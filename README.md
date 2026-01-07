@@ -8,50 +8,50 @@
 
 ---
 
-## 🎯 목표 (Goal)
+## 🎯 Goal
 
-> **"테스트 0개 → 기본 테스트라도 있는 상태"**
+> **"From zero tests to having basic tests"**
 
-이 라이브러리는 완벽한 테스트 자동화가 아닌, **테스트 작성의 진입 장벽을 낮추는 것**을 목표로 합니다.
+This library is not about perfect test automation, but about **lowering the barrier to writing tests**.
 
-### 이 도구가 해결하는 문제
+### Problems This Tool Solves
 
-| 문제 | 해결 |
-|------|------|
-| 😫 "테스트 파일 만들기 귀찮아요" | ✅ 보일러플레이트 자동 생성 |
-| 🤔 "어떻게 시작해야 할지 모르겠어요" | ✅ 실행 가능한 시작점 제공 |
-| 😰 "렌더링 기본 테스트도 없어요" | ✅ 최소한의 안전망 제공 |
-| 📚 "테스트 작성법을 배우고 싶어요" | ✅ 학습 도구로 활용 가능 |
+| Problem | Solution |
+|---------|----------|
+| 😫 "Creating test files is tedious" | ✅ Auto-generate boilerplate |
+| 🤔 "I don't know how to start" | ✅ Provide a working starting point |
+| 😰 "I don't even have basic render tests" | ✅ Provide minimal safety net |
+| 📚 "I want to learn how to write tests" | ✅ Use as a learning tool |
 
-### 이 도구의 한계
+### Limitations
 
 ```
-❌ 비즈니스 로직 테스트 자동 생성 → 개발자가 직접 작성 필요
-❌ 완벽한 테스트 커버리지 → 불가능 (80% 보일러플레이트, 20% 직접 작성)
+❌ Auto-generate business logic tests → Developers must write these
+❌ Perfect test coverage → Not possible (80% boilerplate, 20% manual)
 ```
 
 ---
 
-## 📦 설치 (Installation)
+## 📦 Installation
 
 ```bash
-# 전역 설치
+# Global installation
 npm install -g test-gen-js
 
-# 또는 npx로 바로 사용 (설치 없이)
+# Or use with npx (no installation required)
 npx test-gen-js generate src/components/Button.tsx
 
-# 또는 프로젝트 devDependency로 설치
+# Or install as devDependency
 npm install -D test-gen-js
 ```
 
 ---
 
-## 🚀 빠른 시작 (Quick Start)
+## 🚀 Quick Start
 
-### 1. React 컴포넌트 테스트 생성
+### 1. Generate React Component Tests
 
-**입력: `src/components/Button.tsx`**
+**Input: `src/components/Button.tsx`**
 
 ```tsx
 import React from 'react';
@@ -72,13 +72,13 @@ export const Button = ({ title, onPress, disabled = false, loading = false }: Bu
 };
 ```
 
-**명령어 실행:**
+**Run command:**
 
 ```bash
 npx test-gen-js generate src/components/Button.tsx
 ```
 
-**출력: `src/components/Button.test.tsx`**
+**Output: `src/components/Button.test.tsx`**
 
 ```tsx
 import React from 'react';
@@ -120,9 +120,9 @@ describe('Button', () => {
 
 ---
 
-### 2. React Native 컴포넌트 테스트 생성
+### 2. Generate React Native Component Tests
 
-**입력: `src/components/Card.tsx`**
+**Input: `src/components/Card.tsx`**
 
 ```tsx
 import React, { useState } from 'react';
@@ -152,13 +152,13 @@ const styles = StyleSheet.create({
 });
 ```
 
-**명령어 실행:**
+**Run command:**
 
 ```bash
 npx test-gen-js generate src/components/Card.tsx --snapshot
 ```
 
-**출력: `src/components/Card.test.tsx`**
+**Output: `src/components/Card.test.tsx`**
 
 ```tsx
 import React from 'react';
@@ -203,9 +203,9 @@ describe('Card', () => {
 
 ---
 
-### 3. 일반 함수 테스트 생성
+### 3. Generate Function Tests
 
-**입력: `src/utils/calculate.ts`**
+**Input: `src/utils/calculate.ts`**
 
 ```typescript
 export function calculateDiscount(price: number, discountRate: number): number {
@@ -221,13 +221,13 @@ export async function fetchUserData(userId: string): Promise<User> {
 }
 ```
 
-**명령어 실행:**
+**Run command:**
 
 ```bash
 npx test-gen-js generate src/utils/calculate.ts
 ```
 
-**출력: `src/utils/calculate.test.ts`**
+**Output: `src/utils/calculate.test.ts`**
 
 ```typescript
 import { calculateDiscount, fetchUserData } from './calculate';
@@ -279,58 +279,58 @@ describe('fetchUserData', () => {
 
 ---
 
-## 📋 CLI 명령어
+## 📋 CLI Commands
 
-### `generate` (별칭: `g`)
+### `generate` (alias: `g`)
 
-단일 파일에서 테스트 생성
+Generate tests for a single file
 
 ```bash
-# 기본 사용
+# Basic usage
 test-gen-js generate <file>
 tgjs g <file>
 
-# 옵션
---output, -o <path>    # 출력 파일 경로 지정
---template, -t <type>  # 템플릿 타입 (component | function | hook)
---snapshot             # 스냅샷 테스트 포함
---mock                 # Mock 자동 생성 (기본: true)
---overwrite            # 기존 파일 덮어쓰기
+# Options
+--output, -o <path>    # Specify output file path
+--template, -t <type>  # Template type (component | function | hook)
+--snapshot             # Include snapshot tests
+--mock                 # Auto-generate mocks (default: true)
+--overwrite            # Overwrite existing file
 ```
 
-**예시:**
+**Examples:**
 
 ```bash
-# 기본 생성
+# Basic generation
 tgjs g src/components/Header.tsx
 
-# 스냅샷 테스트 포함
+# Include snapshot tests
 tgjs g src/components/Header.tsx --snapshot
 
-# 커스텀 출력 경로
+# Custom output path
 tgjs g src/components/Header.tsx -o __tests__/Header.test.tsx
 
-# 기존 파일 덮어쓰기
+# Overwrite existing file
 tgjs g src/components/Header.tsx --overwrite
 ```
 
-### `scan` (별칭: `s`) - v0.2.0 예정
+### `scan` (alias: `s`) - Coming in v0.2.0
 
-디렉토리 전체 스캔 및 일괄 생성
+Scan directory and generate tests for all files
 
 ```bash
-# 기본 사용
+# Basic usage
 test-gen-js scan <directory>
 
-# 옵션
---dry-run              # 미리보기 (파일 생성 안 함)
---pattern <glob>       # 파일 패턴 (기본: **/*.{ts,tsx,js,jsx})
---exclude <patterns>   # 제외 패턴
+# Options
+--dry-run              # Preview without creating files
+--pattern <glob>       # File pattern (default: **/*.{ts,tsx,js,jsx})
+--exclude <patterns>   # Patterns to exclude
 ```
 
-### `init` - v0.2.0 예정
+### `init` - Coming in v0.2.0
 
-설정 파일 초기화
+Initialize configuration file
 
 ```bash
 test-gen-js init
@@ -338,29 +338,29 @@ test-gen-js init
 
 ---
 
-## 📊 지원 범위
+## 📊 Supported Types
 
-| 타입 | 지원 여부 | 테스트 프레임워크 | 비고 |
-|------|----------|-----------------|------|
-| JavaScript 함수 | ✅ | Jest | |
-| TypeScript 함수 | ✅ | Jest | 타입 분석 지원 |
-| React 컴포넌트 | ✅ | Jest + @testing-library/react | |
-| React Native 컴포넌트 | ✅ | Jest + @testing-library/react-native | |
+| Type | Support | Test Framework | Notes |
+|------|---------|----------------|-------|
+| JavaScript functions | ✅ | Jest | |
+| TypeScript functions | ✅ | Jest | Type analysis supported |
+| React components | ✅ | Jest + @testing-library/react | |
+| React Native components | ✅ | Jest + @testing-library/react-native | |
 | Custom Hooks | ✅ | Jest + @testing-library/react-hooks | |
-| Node.js 모듈 | 🔜 v0.2 | Jest | |
-| Express 핸들러 | 🔜 v0.2 | Jest + supertest | |
-| Vue 컴포넌트 | 🔜 플러그인 | Vitest | |
-| Angular 컴포넌트 | 🔜 플러그인 | Jasmine | |
+| Node.js modules | 🔜 v0.2 | Jest | |
+| Express handlers | 🔜 v0.2 | Jest + supertest | |
+| Vue components | 🔜 Plugin | Vitest | |
+| Angular components | 🔜 Plugin | Jasmine | |
 
 ---
 
-## 🔧 작동 원리
+## 🔧 How It Works
 
-### AST (Abstract Syntax Tree) 분석
+### AST (Abstract Syntax Tree) Analysis
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  1. 입력: Button.tsx                                            │
+│  1. Input: Button.tsx                                           │
 ├─────────────────────────────────────────────────────────────────┤
 │  export const Button = ({ title, onPress, disabled }) => {      │
 │    const [loading, setLoading] = useState(false);               │
@@ -374,7 +374,7 @@ test-gen-js init
                               │
                               ▼ Babel Parser
 ┌─────────────────────────────────────────────────────────────────┐
-│  2. AST 분석 결과                                               │
+│  2. AST Analysis Result                                         │
 ├─────────────────────────────────────────────────────────────────┤
 │  {                                                              │
 │    name: "Button",                                              │
@@ -392,7 +392,7 @@ test-gen-js init
                               │
                               ▼ EJS Template
 ┌─────────────────────────────────────────────────────────────────┐
-│  3. 출력: Button.test.tsx                                       │
+│  3. Output: Button.test.tsx                                     │
 ├─────────────────────────────────────────────────────────────────┤
 │  describe('Button', () => {                                     │
 │    const defaultProps = { title: '...', onPress: jest.fn() };   │
@@ -403,90 +403,90 @@ test-gen-js init
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 자동화 범위
+### Automation Coverage
 
-| 영역 | 자동화 수준 | 설명 |
-|------|------------|------|
-| import 문 | ✅ 100% | 프레임워크 자동 감지 |
-| describe/it 구조 | ✅ 100% | 컴포넌트/함수명 기반 |
-| defaultProps 생성 | ✅ 80% | TypeScript 타입 분석 |
-| Mock 설정 | ✅ 70% | 주요 라이브러리 자동 감지 |
-| 렌더링 테스트 | ✅ 100% | 기본 제공 |
-| 이벤트 핸들러 테스트 | ✅ 60% | onPress, onClick 등 감지 |
-| Hook 테스트 | ✅ 50% | useState, useEffect 등 감지 |
-| **비즈니스 로직 테스트** | ❌ 0% | **개발자 직접 작성 필요** |
+| Area | Automation Level | Description |
+|------|------------------|-------------|
+| Import statements | ✅ 100% | Auto-detect framework |
+| describe/it structure | ✅ 100% | Based on component/function name |
+| defaultProps generation | ✅ 80% | TypeScript type analysis |
+| Mock setup | ✅ 70% | Auto-detect major libraries |
+| Render tests | ✅ 100% | Always provided |
+| Event handler tests | ✅ 60% | Detect onPress, onClick, etc. |
+| Hook tests | ✅ 50% | Detect useState, useEffect, etc. |
+| **Business logic tests** | ❌ 0% | **Developer must write** |
 
 ---
 
-## 🗺️ 로드맵 (Roadmap)
+## 🗺️ Roadmap
 
-### ✅ 1단계: MVP (v0.1.x) - 현재
+### ✅ Phase 1: MVP (v0.1.x) - Current
 
-- [x] 프로젝트 구조 설정
-- [x] AST 파서 구현 (Babel 기반)
-- [x] CLI 인터페이스 (commander)
-- [x] 기본 테스트 생성기
-  - [x] React 컴포넌트
-  - [x] React Native 컴포넌트
-  - [x] JavaScript/TypeScript 함수
-- [x] EJS 템플릿 시스템
+- [x] Project structure setup
+- [x] AST parser implementation (Babel-based)
+- [x] CLI interface (commander)
+- [x] Basic test generator
+  - [x] React components
+  - [x] React Native components
+  - [x] JavaScript/TypeScript functions
+- [x] EJS template system
 - [x] GitHub Actions CI/CD
-- [x] npm 자동 퍼블리시
+- [x] Automated npm publishing
 
-### 🔜 2단계: 확장 (v0.2.x)
+### 🔜 Phase 2: Extended Features (v0.2.x)
 
-- [ ] 디렉토리 스캔 및 일괄 생성 (`scan` 명령어)
-- [ ] 설정 파일 지원 (`.testgenrc.js`)
-- [ ] Node.js 백엔드 지원
-- [ ] Mock 자동 생성 개선
-- [ ] Prettier/ESLint 연동
-- [ ] Watch 모드
-- [ ] 커스텀 템플릿 지원
+- [ ] Directory scanning and batch generation (`scan` command)
+- [ ] Configuration file support (`.testgenrc.js`)
+- [ ] Node.js backend support
+- [ ] Improved mock generation
+- [ ] Prettier/ESLint integration
+- [ ] Watch mode
+- [ ] Custom template support
 
-### 🔮 3단계: 플러그인 시스템 (v0.3.x+)
+### 🔮 Phase 3: Plugin System (v0.3.x+)
 
-- [ ] 플러그인 아키텍처
-- [ ] Vue.js 플러그인
-- [ ] Angular 플러그인
-- [ ] VS Code 확장
-- [ ] AI 통합 (선택적)
+- [ ] Plugin architecture
+- [ ] Vue.js plugin
+- [ ] Angular plugin
+- [ ] VS Code extension
+- [ ] AI integration (optional)
 
 ---
 
-## 📁 프로젝트 구조
+## 📁 Project Structure
 
 ```
 test-gen-js/
 ├── bin/
-│   └── cli.js                    # CLI 진입점
+│   └── cli.js                    # CLI entry point
 ├── src/
-│   ├── index.ts                  # 메인 export
-│   ├── cli.ts                    # CLI 로직 (commander)
-│   ├── types.ts                  # TypeScript 타입 정의
+│   ├── index.ts                  # Main exports
+│   ├── cli.ts                    # CLI logic (commander)
+│   ├── types.ts                  # TypeScript type definitions
 │   ├── analyzer/
 │   │   ├── index.ts
-│   │   ├── fileAnalyzer.ts       # 파일 분석 메인
-│   │   ├── componentAnalyzer.ts  # React 컴포넌트 분석
-│   │   └── functionAnalyzer.ts   # 함수 분석
+│   │   ├── fileAnalyzer.ts       # Main file analysis
+│   │   ├── componentAnalyzer.ts  # React component analysis
+│   │   └── functionAnalyzer.ts   # Function analysis
 │   ├── parser/
 │   │   ├── index.ts
-│   │   ├── astParser.ts          # Babel AST 파싱
-│   │   └── typeExtractor.ts      # TypeScript 타입 추출
+│   │   ├── astParser.ts          # Babel AST parsing
+│   │   └── typeExtractor.ts      # TypeScript type extraction
 │   ├── generator/
 │   │   ├── index.ts
-│   │   ├── testGenerator.ts      # 테스트 코드 생성
-│   │   └── mockGenerator.ts      # Mock 코드 생성
+│   │   ├── testGenerator.ts      # Test code generation
+│   │   └── mockGenerator.ts      # Mock code generation
 │   ├── templates/
-│   │   ├── component.ejs         # 컴포넌트 테스트 템플릿
-│   │   ├── function.ejs          # 함수 테스트 템플릿
-│   │   └── snapshot.ejs          # 스냅샷 테스트 템플릿
+│   │   ├── component.ejs         # Component test template
+│   │   ├── function.ejs          # Function test template
+│   │   └── snapshot.ejs          # Snapshot test template
 │   └── utils/
-│       ├── fileUtils.ts          # 파일 유틸리티
-│       └── naming.ts             # 네이밍 유틸리티
+│       ├── fileUtils.ts          # File utilities
+│       └── naming.ts             # Naming utilities
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml                # CI (빌드/테스트)
-│       └── publish.yml           # npm 자동 퍼블리시
+│       ├── ci.yml                # CI (build/test)
+│       └── publish.yml           # Automated npm publish
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -494,11 +494,11 @@ test-gen-js/
 
 ---
 
-## 🤝 기여하기 (Contributing)
+## 🤝 Contributing
 
-기여는 언제나 환영합니다!
+Contributions are always welcome!
 
-### 기여 방법
+### How to Contribute
 
 1. 🍴 Fork the repository
 2. 🌿 Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -506,33 +506,33 @@ test-gen-js/
 4. 📤 Push to the branch (`git push origin feature/amazing-feature`)
 5. 🔃 Open a Pull Request
 
-### 기여 유형
+### Types of Contributions
 
-- 🐛 버그 리포트
-- 💡 기능 제안
-- 📝 문서 개선
-- 🔧 코드 기여
-- 🌍 번역
-
----
-
-## 📄 라이선스 (License)
-
-MIT License - 자유롭게 사용, 수정, 배포할 수 있습니다.
+- 🐛 Bug reports
+- 💡 Feature requests
+- 📝 Documentation improvements
+- 🔧 Code contributions
+- 🌍 Translations
 
 ---
 
-## 🙏 감사의 글 (Acknowledgments)
+## 📄 License
 
-- [Babel](https://babeljs.io/) - JavaScript AST 파싱
-- [Jest](https://jestjs.io/) - 테스트 프레임워크
-- [Testing Library](https://testing-library.com/) - 테스트 유틸리티
-- [Commander.js](https://github.com/tj/commander.js) - CLI 프레임워크
-- [EJS](https://ejs.co/) - 템플릿 엔진
+MIT License - Feel free to use, modify, and distribute.
 
 ---
 
-## 📞 문의 (Contact)
+## 🙏 Acknowledgments
+
+- [Babel](https://babeljs.io/) - JavaScript AST parsing
+- [Jest](https://jestjs.io/) - Testing framework
+- [Testing Library](https://testing-library.com/) - Testing utilities
+- [Commander.js](https://github.com/tj/commander.js) - CLI framework
+- [EJS](https://ejs.co/) - Template engine
+
+---
+
+## 📞 Contact
 
 - GitHub Issues: [https://github.com/liveforownhappiness/test-gen-js/issues](https://github.com/liveforownhappiness/test-gen-js/issues)
 - npm: [https://www.npmjs.com/package/test-gen-js](https://www.npmjs.com/package/test-gen-js)
