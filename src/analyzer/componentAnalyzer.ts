@@ -106,11 +106,14 @@ function extractProps(
       const typeNode = firstParam.typeAnnotation.typeAnnotation;
       if (t.isTSTypeLiteral(typeNode)) {
         for (const member of typeNode.members) {
-          if (t.isTSPropertySignature(member) && t.isIdentifier(member.key)) {
-            const existingProp = props.find((p) => p.name === member.key.name);
-            if (existingProp && member.typeAnnotation) {
-              existingProp.type = extractTypes(member.typeAnnotation);
-              existingProp.required = !member.optional;
+          if (t.isTSPropertySignature(member)) {
+            const key = member.key;
+            if (t.isIdentifier(key)) {
+              const existingProp = props.find((p) => p.name === key.name);
+              if (existingProp && member.typeAnnotation) {
+                existingProp.type = extractTypes(member.typeAnnotation);
+                existingProp.required = !member.optional;
+              }
             }
           }
         }
@@ -126,12 +129,15 @@ function extractProps(
       const typeNode = firstParam.typeAnnotation.typeAnnotation;
       if (t.isTSTypeLiteral(typeNode)) {
         for (const member of typeNode.members) {
-          if (t.isTSPropertySignature(member) && t.isIdentifier(member.key)) {
-            props.push({
-              name: member.key.name,
-              type: extractTypes(member.typeAnnotation),
-              required: !member.optional,
-            });
+          if (t.isTSPropertySignature(member)) {
+            const key = member.key;
+            if (t.isIdentifier(key)) {
+              props.push({
+                name: key.name,
+                type: extractTypes(member.typeAnnotation),
+                required: !member.optional,
+              });
+            }
           }
         }
       }
