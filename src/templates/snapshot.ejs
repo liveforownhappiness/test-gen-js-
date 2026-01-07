@@ -1,0 +1,48 @@
+<%
+const testLib = helpers.getTestingLibrary(analysis.framework);
+const sourceImport = helpers.getRelativeImport(analysis.filePath.replace(/\.(tsx?|jsx?)$/, '.test.$1'), analysis.filePath);
+%>
+import React from 'react';
+import { render } from '<%= testLib.package %>';
+<% analysis.components.forEach(component => { %>
+import { <%= component.name %> } from '<%= sourceImport %>';
+<% }); %>
+
+<% analysis.components.forEach(component => { %>
+describe('<%= component.name %> Snapshots', () => {
+  const defaultProps = {
+<% component.props.forEach((prop, index) => { %>
+    <%= prop.name %>: <%= helpers.generatePropValue(prop) %><%= index < component.props.length - 1 ? ',' : '' %>
+<% }); %>
+  };
+
+  it('renders correctly with default props', () => {
+    const { toJSON } = render(<<%= component.name %> {...defaultProps} />);
+    expect(toJSON()).toMatchSnapshot();
+  });
+
+<% component.props.filter(p => p.type === 'boolean').forEach(prop => { %>
+  it('renders correctly with <%= prop.name %>=true', () => {
+    const { toJSON } = render(<<%= component.name %> {...defaultProps} <%= prop.name %>={true} />);
+    expect(toJSON()).toMatchSnapshot();
+  });
+
+  it('renders correctly with <%= prop.name %>=false', () => {
+    const { toJSON } = render(<<%= component.name %> {...defaultProps} <%= prop.name %>={false} />);
+    expect(toJSON()).toMatchSnapshot();
+  });
+
+<% }); %>
+<% component.props.filter(p => !p.required).forEach(prop => { %>
+  it('renders correctly without <%= prop.name %>', () => {
+    const propsWithout<%= prop.name.charAt(0).toUpperCase() + prop.name.slice(1) %> = { ...defaultProps };
+    delete propsWithout<%= prop.name.charAt(0).toUpperCase() + prop.name.slice(1) %>.<%= prop.name %>;
+    const { toJSON } = render(<<%= component.name %> {...propsWithout<%= prop.name.charAt(0).toUpperCase() + prop.name.slice(1) %>} />);
+    expect(toJSON()).toMatchSnapshot();
+  });
+
+<% }); %>
+});
+
+<% }); %>
+

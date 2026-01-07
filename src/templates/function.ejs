@@ -1,0 +1,59 @@
+<%
+const sourceImport = helpers.getRelativeImport(analysis.filePath.replace(/\.(tsx?|jsx?)$/, '.test.$1'), analysis.filePath);
+%>
+<% analysis.functions.forEach(func => { %>
+import { <%= func.name %> } from '<%= sourceImport %>';
+<% }); %>
+
+<% analysis.functions.forEach(func => { %>
+describe('<%= func.name %>', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+<% if (func.isAsync) { %>
+  it('should resolve successfully', async () => {
+    const result = await <%= func.name %>(<%= func.params.map(p => helpers.generateMockValue(p.type)).join(', ') %>);
+    
+    // TODO: Add assertions
+    expect(result).toBeDefined();
+  });
+
+  it('should handle errors gracefully', async () => {
+    // TODO: Mock error scenario
+    // Example:
+    // jest.spyOn(someModule, 'someMethod').mockRejectedValue(new Error('Test error'));
+    // await expect(<%= func.name %>()).rejects.toThrow('Test error');
+  });
+<% } else { %>
+  it('should return expected result', () => {
+    const result = <%= func.name %>(<%= func.params.map(p => helpers.generateMockValue(p.type)).join(', ') %>);
+    
+    // TODO: Add assertions
+    expect(result).toBeDefined();
+  });
+
+  it('should handle edge cases', () => {
+    // TODO: Test with edge case values
+    // Example: empty strings, zero, null, undefined, etc.
+  });
+<% } %>
+
+<% func.params.forEach(param => { %>
+  describe('<%= param.name %> parameter', () => {
+    it('should handle valid <%= param.name %>', () => {
+      // TODO: Test with valid <%= param.name %> values
+    });
+
+<% if (!param.optional) { %>
+    it('should handle missing <%= param.name %>', () => {
+      // TODO: Test behavior when <%= param.name %> is missing
+    });
+<% } %>
+  });
+
+<% }); %>
+});
+
+<% }); %>
+

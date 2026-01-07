@@ -1,0 +1,67 @@
+<%
+const testLib = helpers.getTestingLibrary(analysis.framework);
+const sourceImport = helpers.getRelativeImport(analysis.filePath.replace(/\.(tsx?|jsx?)$/, '.test.$1'), analysis.filePath);
+%>
+import React from 'react';
+import { <%= testLib.imports.join(', ') %> } from '<%= testLib.package %>';
+<% analysis.components.forEach(component => { %>
+import { <%= component.name %> } from '<%= sourceImport %>';
+<% }); %>
+
+<% analysis.components.forEach(component => { %>
+describe('<%= component.name %>', () => {
+  const defaultProps = {
+<% component.props.forEach((prop, index) => { %>
+    <%= prop.name %>: <%= helpers.generatePropValue(prop) %><%= index < component.props.length - 1 ? ',' : '' %>
+<% }); %>
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders without crashing', () => {
+    render(<<%= component.name %> {...defaultProps} />);
+  });
+
+<% if (options.snapshot) { %>
+  it('matches snapshot', () => {
+    const { toJSON } = render(<<%= component.name %> {...defaultProps} />);
+    expect(toJSON()).toMatchSnapshot();
+  });
+
+<% } %>
+<% component.props.filter(p => p.required).forEach(prop => { %>
+  it('renders with <%= prop.name %> prop', () => {
+    render(<<%= component.name %> {...defaultProps} />);
+    // TODO: Add specific assertions for <%= prop.name %>
+  });
+
+<% }); %>
+<% component.events.forEach(event => { %>
+  it('calls <%= event %> when triggered', () => {
+    const handler = jest.fn();
+    render(<<%= component.name %> {...defaultProps} <%= event %>={handler} />);
+    
+    // TODO: Trigger the <%= event %> event
+    // Example for React Native:
+    // fireEvent.press(screen.getByTestId('button'));
+    // Example for React:
+    // fireEvent.click(screen.getByRole('button'));
+    
+    // expect(handler).toHaveBeenCalled();
+  });
+
+<% }); %>
+<% component.hooks.forEach(hook => { %>
+  // Hook: <%= hook %>
+  it('uses <%= hook %> correctly', () => {
+    render(<<%= component.name %> {...defaultProps} />);
+    // TODO: Add assertions for <%= hook %> behavior
+  });
+
+<% }); %>
+});
+
+<% }); %>
+
