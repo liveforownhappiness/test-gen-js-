@@ -30,7 +30,6 @@ coverage/
 
 # npm
 *.tgz
-package-lock.json
 
 # Temporary files
 tmp/
