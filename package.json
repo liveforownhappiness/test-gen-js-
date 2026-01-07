@@ -1,6 +1,6 @@
 {
   "name": "test-gen-js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Auto-generate test boilerplate code for JavaScript/TypeScript, React, and React Native projects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
