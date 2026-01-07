@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "test-gen-js": "./bin/cli.js",
-    "tgjs": "./bin/cli.js"
+    "test-gen-js": "bin/cli.js",
+    "tgjs": "bin/cli.js"
   },
   "scripts": {
     "build": "tsc",
