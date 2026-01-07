@@ -4,7 +4,7 @@
 
 [![npm version](https://badge.fury.io/js/test-gen-js.svg)](https://www.npmjs.com/package/test-gen-js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Actions](https://github.com/liveforownhappiness/test-gen-js-/actions/workflows/ci.yml/badge.svg)](https://github.com/liveforownhappiness/test-gen-js-/actions)
+[![GitHub Actions](https://github.com/liveforownhappiness/test-gen-js/actions/workflows/ci.yml/badge.svg)](https://github.com/liveforownhappiness/test-gen-js/actions)
 
 ---
 
@@ -534,5 +534,5 @@ MIT License - 자유롭게 사용, 수정, 배포할 수 있습니다.
 
 ## 📞 문의 (Contact)
 
-- GitHub Issues: [https://github.com/liveforownhappiness/test-gen-js-/issues](https://github.com/liveforownhappiness/test-gen-js-/issues)
+- GitHub Issues: [https://github.com/liveforownhappiness/test-gen-js/issues](https://github.com/liveforownhappiness/test-gen-js/issues)
 - npm: [https://www.npmjs.com/package/test-gen-js](https://www.npmjs.com/package/test-gen-js)

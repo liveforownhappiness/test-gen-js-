@@ -36,12 +36,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liveforownhappiness/test-gen-js-.git"
+    "url": "git+https://github.com/liveforownhappiness/test-gen-js.git"
   },
   "bugs": {
-    "url": "https://github.com/liveforownhappiness/test-gen-js-/issues"
+    "url": "https://github.com/liveforownhappiness/test-gen-js/issues"
   },
-  "homepage": "https://github.com/liveforownhappiness/test-gen-js-#readme",
+  "homepage": "https://github.com/liveforownhappiness/test-gen-js#readme",
   "files": [
     "dist",
     "bin",
