@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { analyzeFile } from './analyzer';
 import { generateTest } from './generator';
+import { initCommand } from './commands';
 import type { GeneratorOptions } from './types';
 
 const program = new Command();
@@ -101,17 +102,18 @@ program
 // Init command
 program
   .command('init')
-  .description('Initialize test-gen-js configuration')
-  .action(async () => {
-    const spinner = ora('Creating configuration...').start();
-
+  .description('Initialize test-gen-js configuration and Git hooks')
+  .option('--no-hooks', 'Skip Git hooks setup')
+  .option('--force', 'Overwrite existing configuration', false)
+  .action(async (options: { hooks: boolean; force: boolean }) => {
     try {
-      // TODO: Implement config initialization
-      spinner.info(chalk.yellow('Configuration file is coming in v0.2.0'));
+      await initCommand({
+        hooks: options.hooks,
+        force: options.force,
+      });
     } catch (error) {
-      spinner.fail(chalk.red('Failed to create configuration'));
       if (error instanceof Error) {
-        console.error(chalk.red(error.message));
+        console.error(chalk.red('Error: ' + error.message));
       }
       process.exit(1);
     }

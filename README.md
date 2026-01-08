@@ -47,6 +47,44 @@ npm install -D test-gen-js
 
 ---
 
+## 🛠️ Setup with Git Hooks (Recommended)
+
+Set up automatic testing before each commit:
+
+```bash
+# 1. Install as dev dependency
+npm install -D test-gen-js
+
+# 2. Initialize (creates config + sets up Git hooks)
+npx test-gen-js init
+
+# 3. Generate tests for your components
+npx test-gen-js generate src/components/Button.tsx
+
+# 4. Now when you commit, tests run automatically!
+git add .
+git commit -m "feat: add Button component"
+# 🧪 Running tests before commit...
+# ✅ Tests passed!
+```
+
+### What `init` Does
+
+| Item | Description |
+|------|-------------|
+| `.testgenrc.js` | Creates configuration file |
+| `husky` | Installs Git hooks manager |
+| `lint-staged` | Runs tests on staged files only |
+| `pre-commit` | Tests run before each commit |
+
+### Pre-commit Behavior
+
+- ✅ Tests pass → Commit proceeds
+- ❌ Tests fail → Commit is **blocked**
+- ⏭️ Skip with `git commit --no-verify` (not recommended)
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Generate React Component Tests
@@ -328,13 +366,47 @@ test-gen-js scan <directory>
 --exclude <patterns>   # Patterns to exclude
 ```
 
-### `init` - Coming in v0.2.0
+### `init`
 
-Initialize configuration file
+Initialize test-gen-js configuration and set up Git hooks for pre-commit testing.
 
 ```bash
+# Basic usage - creates config and sets up Git hooks
 test-gen-js init
+
+# Options
+--no-hooks    # Skip Git hooks setup
+--force       # Overwrite existing configuration
 ```
+
+**What it does:**
+
+1. Creates `.testgenrc.js` configuration file
+2. Installs `husky` and `lint-staged` (if not present)
+3. Sets up pre-commit hook to run tests before each commit
+
+**Example:**
+
+```bash
+# Install test-gen-js as dev dependency
+npm install -D test-gen-js
+
+# Initialize (sets up Git hooks)
+npx test-gen-js init
+
+# Now when you commit, tests will run automatically!
+git add .
+git commit -m "feat: add new component"
+# 🧪 Running tests before commit...
+# ✅ Tests passed, commit successful!
+```
+
+**Pre-commit behavior:**
+
+- Tests run only for **staged files** (files you're committing)
+- If tests fail, commit is **blocked**
+- If tests pass, commit proceeds normally
+- Use `git commit --no-verify` to skip tests (not recommended)
 
 ---
 
@@ -436,7 +508,8 @@ test-gen-js init
 ### 🔜 Phase 2: Extended Features (v0.2.x)
 
 - [ ] Directory scanning and batch generation (`scan` command)
-- [ ] Configuration file support (`.testgenrc.js`)
+- [x] Configuration file support (`.testgenrc.js`)
+- [x] Git hooks for pre-commit testing (`init` command)
 - [ ] Node.js backend support
 - [ ] Improved mock generation
 - [ ] Prettier/ESLint integration

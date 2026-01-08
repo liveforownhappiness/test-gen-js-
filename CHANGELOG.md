@@ -9,9 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 - Directory scanning (`scan` command)
-- Configuration file support (`.testgenrc.js`)
 - Node.js backend support
 - Custom templates
+- Watch mode
+- Prettier/ESLint integration
+
+---
+
+## [0.2.0] - 2024-01-07
+
+### Added
+- 🎉 `init` command - Initialize test-gen-js configuration
+  - Creates `.testgenrc.js` configuration file
+  - Sets up Git hooks with husky and lint-staged
+  - Pre-commit hook runs tests automatically before each commit
+- Configuration file support (`.testgenrc.js`)
+
+### Commands
+- `test-gen-js init` - Initialize configuration and Git hooks
+  - `--no-hooks` - Skip Git hooks setup
+  - `--force` - Overwrite existing configuration
+
+### How Pre-commit Testing Works
+1. Run `npx test-gen-js init` in your project
+2. Husky and lint-staged are automatically installed
+3. When you run `git commit`, tests run for staged files
+4. If tests pass, commit proceeds; if tests fail, commit is blocked
 
 ---
 
@@ -65,7 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/liveforownhappiness/test-gen-js/releases/tag/v0.1.0
 [0.0.1]: https://github.com/liveforownhappiness/test-gen-js/releases/tag/v0.0.1
 
