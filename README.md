@@ -352,18 +352,65 @@ tgjs g src/components/Header.tsx -o __tests__/Header.test.tsx
 tgjs g src/components/Header.tsx --overwrite
 ```
 
-### `scan` (alias: `s`) - Coming in v0.2.0
+### `scan` (alias: `s`)
 
-Scan directory and generate tests for all files
+Scan directory and generate tests for all files at once.
 
 ```bash
-# Basic usage
-test-gen-js scan <directory>
+# Basic usage - scan entire src folder
+test-gen-js scan src
+tgjs s src
 
 # Options
 --dry-run              # Preview without creating files
 --pattern <glob>       # File pattern (default: **/*.{ts,tsx,js,jsx})
 --exclude <patterns>   # Patterns to exclude
+--snapshot             # Include snapshot tests
+--overwrite            # Overwrite existing test files
+```
+
+**Examples:**
+
+```bash
+# Preview what will be generated (no files created)
+tgjs scan src --dry-run
+
+# Generate tests for all components in src/components
+tgjs scan src/components
+
+# Generate tests with snapshots
+tgjs scan src --snapshot
+
+# Overwrite existing test files
+tgjs scan src --overwrite
+
+# Custom pattern (only .tsx files)
+tgjs scan src --pattern "**/*.tsx"
+```
+
+**Output example:**
+
+```
+🔍 Scanning directory: /your-project/src
+📝 Pattern: **/*.{ts,tsx,js,jsx}
+🚫 Exclude: node_modules/**, dist/**, **/*.test.*, ...
+
+📦 Processing files...
+
+[1/5] ✅ components/Button.tsx → components/Button.test.tsx
+[2/5] ✅ components/Card.tsx → components/Card.test.tsx
+[3/5] ⏭️  components/index.ts (no components/functions)
+[4/5] ✅ utils/helpers.ts → utils/helpers.test.ts
+[5/5] ❌ utils/broken.ts: Parse error
+
+══════════════════════════════════════════════════
+📊 Summary
+══════════════════════════════════════════════════
+   Total files:    5
+   Created:        3
+   Updated:        0
+   Skipped:        1
+   Failed:         1
 ```
 
 ### `init`
@@ -505,9 +552,9 @@ git commit -m "feat: add new component"
 - [x] GitHub Actions CI/CD
 - [x] Automated npm publishing
 
-### 🔜 Phase 2: Extended Features (v0.2.x)
+### ✅ Phase 2: Extended Features (v0.2.x) - Current
 
-- [ ] Directory scanning and batch generation (`scan` command)
+- [x] Directory scanning and batch generation (`scan` command)
 - [x] Configuration file support (`.testgenrc.js`)
 - [x] Git hooks for pre-commit testing (`init` command)
 - [ ] Node.js backend support

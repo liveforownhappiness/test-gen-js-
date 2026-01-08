@@ -23,12 +23,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Creates `.testgenrc.js` configuration file
   - Sets up Git hooks with husky and lint-staged
   - Pre-commit hook runs tests automatically before each commit
+- 🎉 `scan` command - Scan directory and generate tests for all files
+  - Batch generate tests for entire directories
+  - Dry-run mode to preview without creating files
+  - Progress tracking and summary report
+  - Skip files with no components/functions
 - Configuration file support (`.testgenrc.js`)
 
 ### Commands
 - `test-gen-js init` - Initialize configuration and Git hooks
   - `--no-hooks` - Skip Git hooks setup
   - `--force` - Overwrite existing configuration
+- `test-gen-js scan <directory>` - Scan and generate tests
+  - `--dry-run` - Preview without creating files
+  - `--pattern` - File pattern to match
+  - `--exclude` - Patterns to exclude
+  - `--snapshot` - Include snapshot tests
+  - `--overwrite` - Overwrite existing files
 
 ### How Pre-commit Testing Works
 1. Run `npx test-gen-js init` in your project

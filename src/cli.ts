@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { analyzeFile } from './analyzer';
 import { generateTest } from './generator';
-import { initCommand } from './commands';
+import { initCommand, scanCommand } from './commands';
 import type { GeneratorOptions } from './types';
 
 const program = new Command();
@@ -78,22 +78,21 @@ program
   .description('Scan directory and generate tests for all files')
   .option('--dry-run', 'Preview without creating files', false)
   .option('--pattern <glob>', 'File pattern to match', '**/*.{ts,tsx,js,jsx}')
-  .option('--exclude <patterns...>', 'Patterns to exclude', ['node_modules', 'dist', '*.test.*', '*.spec.*'])
+  .option('--exclude <patterns...>', 'Patterns to exclude')
+  .option('--snapshot', 'Include snapshot tests', false)
+  .option('--overwrite', 'Overwrite existing test files', false)
   .action(async (directory: string, options) => {
-    const spinner = ora('Scanning directory...').start();
-
     try {
-      // TODO: Implement directory scanning
-      spinner.info(chalk.yellow('Directory scanning is coming in v0.2.0'));
-      console.log('');
-      console.log(chalk.cyan('Directory:'), directory);
-      console.log(chalk.cyan('Pattern:'), options.pattern);
-      console.log(chalk.cyan('Exclude:'), options.exclude.join(', '));
-      console.log(chalk.cyan('Dry run:'), options.dryRun);
+      await scanCommand(directory, {
+        pattern: options.pattern,
+        exclude: options.exclude,
+        dryRun: options.dryRun,
+        snapshot: options.snapshot,
+        overwrite: options.overwrite,
+      });
     } catch (error) {
-      spinner.fail(chalk.red('Failed to scan directory'));
       if (error instanceof Error) {
-        console.error(chalk.red(error.message));
+        console.error(chalk.red('Error: ' + error.message));
       }
       process.exit(1);
     }
