@@ -4,7 +4,6 @@
  */
 
 import type { NodePath } from '@babel/traverse';
-import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import { extractTypes } from '../parser/typeExtractor';
 import type { ComponentInfo, PropInfo } from '../types';
@@ -158,23 +157,40 @@ function extractHooks(
   const body = t.isBlockStatement(node.body) ? node.body : null;
   if (!body) return [];
 
-  traverse(
-    body,
-    {
-      CallExpression(path) {
-        if (t.isIdentifier(path.node.callee)) {
-          const name = path.node.callee.name;
-          if (name.startsWith('use')) {
-            hooks.add(name);
-          }
-        }
-      },
-    },
-    undefined,
-    { node: body }
-  );
+  // Use recursive walk instead of traverse to avoid scope issues
+  findHooks(body, hooks);
 
   return Array.from(hooks);
+}
+
+/**
+ * Recursively find hook calls in a node
+ */
+function findHooks(node: t.Node, hooks: Set<string>): void {
+  // Check if this is a hook call
+  if (t.isCallExpression(node)) {
+    if (t.isIdentifier(node.callee)) {
+      const name = node.callee.name;
+      if (name.startsWith('use')) {
+        hooks.add(name);
+      }
+    }
+  }
+
+  // Recursively check all child nodes
+  const keys = t.VISITOR_KEYS[node.type] || [];
+  for (const key of keys) {
+    const child = (node as unknown as Record<string, unknown>)[key];
+    if (Array.isArray(child)) {
+      for (const c of child) {
+        if (c && typeof c === 'object' && 'type' in c) {
+          findHooks(c as t.Node, hooks);
+        }
+      }
+    } else if (child && typeof child === 'object' && 'type' in child) {
+      findHooks(child as t.Node, hooks);
+    }
+  }
 }
 
 /**

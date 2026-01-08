@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Directory scanning (`scan` command)
 - Node.js backend support
 - Custom templates
 - Watch mode
@@ -16,7 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.2.0] - 2024-01-07
+## [0.2.1] - 2026-01-08
+
+### Fixed
+- 🐛 Fixed AST traversal error "You must pass a scope and parentPath unless traversing a Program/File"
+  - Replaced `@babel/traverse` with recursive node walking for BlockStatement analysis
+  - Fixed `isReactComponent` function in `fileAnalyzer.ts`
+  - Fixed `extractHooks` function in `componentAnalyzer.ts`
+  - Now correctly handles components wrapped with `memo()`, `forwardRef()`, etc.
+
+---
+
+## [0.2.0] - 2026-01-07
 
 ### Added
 - 🎉 `init` command - Initialize test-gen-js configuration

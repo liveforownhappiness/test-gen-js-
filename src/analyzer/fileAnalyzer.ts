@@ -140,30 +140,45 @@ export async function analyzeDirectory(
 function isReactComponent(
   node: t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression
 ): boolean {
-  let hasJSX = false;
-
-  // Check if the function body contains JSX
-  if (t.isBlockStatement(node.body)) {
-    // Function with block body
-    traverse(
-      node.body,
-      {
-        JSXElement() {
-          hasJSX = true;
-        },
-        JSXFragment() {
-          hasJSX = true;
-        },
-      },
-      undefined,
-      { node }
-    );
-  } else if (t.isJSXElement(node.body) || t.isJSXFragment(node.body)) {
-    // Arrow function with direct JSX return
-    hasJSX = true;
+  // Arrow function with direct JSX return
+  if (t.isJSXElement(node.body) || t.isJSXFragment(node.body)) {
+    return true;
   }
 
-  return hasJSX;
+  // Check if the function body contains JSX using recursive walk
+  if (t.isBlockStatement(node.body)) {
+    return containsJSX(node.body);
+  }
+
+  return false;
+}
+
+/**
+ * Recursively check if a node contains JSX elements
+ */
+function containsJSX(node: t.Node): boolean {
+  if (t.isJSXElement(node) || t.isJSXFragment(node)) {
+    return true;
+  }
+
+  // Recursively check all child nodes
+  const keys = t.VISITOR_KEYS[node.type] || [];
+  for (const key of keys) {
+    const child = (node as Record<string, unknown>)[key];
+    if (Array.isArray(child)) {
+      for (const c of child) {
+        if (c && typeof c === 'object' && 'type' in c && containsJSX(c as t.Node)) {
+          return true;
+        }
+      }
+    } else if (child && typeof child === 'object' && 'type' in child) {
+      if (containsJSX(child as t.Node)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**
