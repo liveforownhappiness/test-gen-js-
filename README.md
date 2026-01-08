@@ -32,6 +32,23 @@ This library is not about perfect test automation, but about **lowering the barr
 
 ---
 
+## 📋 Prerequisites
+
+Make sure you have the following packages installed in your project:
+
+```bash
+# Required for TypeScript type checking in test files
+npm install -D @types/jest jest
+
+# For React projects
+npm install -D @testing-library/react @testing-library/jest-dom
+
+# For React Native projects
+npm install -D @testing-library/react-native
+```
+
+---
+
 ## 📦 Installation
 
 ```bash

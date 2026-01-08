@@ -2,6 +2,7 @@
 const testLib = helpers.getTestingLibrary(analysis.framework);
 const sourceImport = helpers.getRelativeImport(analysis.filePath.replace(/\.(tsx?|jsx?)$/, '.test.$1'), analysis.filePath);
 %>
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import { <%= testLib.imports.join(', ') %> } from '<%= testLib.package %>';
 <% analysis.components.forEach(component => { %>
@@ -12,7 +13,7 @@ import { <%= component.name %> } from '<%= sourceImport %>';
 describe('<%= component.name %>', () => {
   const defaultProps = {
 <% component.props.forEach((prop, index) => { %>
-    <%= prop.name %>: <%= helpers.generatePropValue(prop) %><%= index < component.props.length - 1 ? ',' : '' %>
+    <%- prop.name %>: <%- helpers.generatePropValue(prop) %><%- index < component.props.length - 1 ? ',' : '' %>
 <% }); %>
   };
 

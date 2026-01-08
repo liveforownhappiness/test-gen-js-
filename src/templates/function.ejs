@@ -1,6 +1,7 @@
 <%
 const sourceImport = helpers.getRelativeImport(analysis.filePath.replace(/\.(tsx?|jsx?)$/, '.test.$1'), analysis.filePath);
 %>
+/* eslint-disable @typescript-eslint/no-unused-vars */
 <% analysis.functions.forEach(func => { %>
 import { <%= func.name %> } from '<%= sourceImport %>';
 <% }); %>
@@ -13,7 +14,7 @@ describe('<%= func.name %>', () => {
 
 <% if (func.isAsync) { %>
   it('should resolve successfully', async () => {
-    const result = await <%= func.name %>(<%= func.params.map(p => helpers.generateMockValue(p.type)).join(', ') %>);
+    const result = await <%- func.name %>(<%- func.params.map(p => helpers.generateMockValue(p.type)).join(', ') %>);
     
     // TODO: Add assertions
     expect(result).toBeDefined();
@@ -27,7 +28,7 @@ describe('<%= func.name %>', () => {
   });
 <% } else { %>
   it('should return expected result', () => {
-    const result = <%= func.name %>(<%= func.params.map(p => helpers.generateMockValue(p.type)).join(', ') %>);
+    const result = <%- func.name %>(<%- func.params.map(p => helpers.generateMockValue(p.type)).join(', ') %>);
     
     // TODO: Add assertions
     expect(result).toBeDefined();
