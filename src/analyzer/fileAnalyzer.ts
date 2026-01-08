@@ -164,7 +164,7 @@ function containsJSX(node: t.Node): boolean {
   // Recursively check all child nodes
   const keys = t.VISITOR_KEYS[node.type] || [];
   for (const key of keys) {
-    const child = (node as Record<string, unknown>)[key];
+    const child = (node as unknown as Record<string, unknown>)[key];
     if (Array.isArray(child)) {
       for (const c of child) {
         if (c && typeof c === 'object' && 'type' in c && containsJSX(c as t.Node)) {
