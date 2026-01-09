@@ -15,6 +15,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2026-01-09
+
+### Added
+- 🎉 **HOC Pattern Support** - Now correctly detects and analyzes components wrapped with Higher-Order Components
+  - `memo()` and `React.memo()` support
+  - `forwardRef()` and `React.forwardRef()` support
+  - `lazy()` and `React.lazy()` support
+  - Nested HOCs: `memo(forwardRef(() => {}))` support
+  - `export default memo(Component)` pattern support
+  - `const Wrapped = memo(() => {})` pattern support
+
+### Fixed
+- 🐛 Fixed EJS template HTML escaping issue (`'` → `&#39;`)
+  - Changed `<%= %>` to `<%- %>` for code generation
+- 📝 Added Prerequisites section to README
+
+---
+
 ## [0.2.1] - 2026-01-08
 
 ### Fixed

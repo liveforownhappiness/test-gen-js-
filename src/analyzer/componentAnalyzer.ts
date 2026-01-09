@@ -9,6 +9,43 @@ import { extractTypes } from '../parser/typeExtractor';
 import type { ComponentInfo, PropInfo } from '../types';
 
 /**
+ * Analyze a HOC-wrapped component (memo, forwardRef, etc.)
+ */
+export function analyzeHOCComponent(
+  funcNode: t.ArrowFunctionExpression | t.FunctionExpression,
+  componentName: string,
+  filePath: string,
+  hocName: string
+): ComponentInfo {
+  // For forwardRef, the second parameter is the ref
+  // For memo, it's just the regular props
+  const isForwardRef = hocName === 'forwardRef';
+
+  // Extract props (first parameter)
+  const props = extractPropsFromFunc(funcNode, isForwardRef);
+
+  // Extract hooks
+  const hooks = extractHooks(funcNode);
+
+  // Extract event handlers
+  const events = extractEventsFromProps(props);
+
+  // Check if component accepts children
+  const children = props.some((p) => p.name === 'children');
+
+  return {
+    name: componentName,
+    type: 'arrow',
+    props,
+    hooks,
+    events,
+    children,
+    imports: [],
+    filePath,
+  };
+}
+
+/**
  * Analyze a component and extract its information
  */
 export function analyzeComponent(
@@ -69,6 +106,16 @@ export function analyzeComponent(
  */
 function extractProps(
   node: t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression
+): PropInfo[] {
+  return extractPropsFromFunc(node, false);
+}
+
+/**
+ * Extract props from a function (can handle forwardRef which has ref as second param)
+ */
+function extractPropsFromFunc(
+  node: t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression,
+  _isForwardRef: boolean = false
 ): PropInfo[] {
   const props: PropInfo[] = [];
   const firstParam = node.params[0];
@@ -199,8 +246,15 @@ function findHooks(node: t.Node, hooks: Set<string>): void {
 function extractEvents(
   node: t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression
 ): string[] {
-  const events: Set<string> = new Set();
   const props = extractProps(node);
+  return extractEventsFromProps(props);
+}
+
+/**
+ * Extract event handlers from props array
+ */
+function extractEventsFromProps(props: PropInfo[]): string[] {
+  const events: Set<string> = new Set();
 
   // Check props for event handlers
   for (const prop of props) {

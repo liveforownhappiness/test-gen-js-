@@ -7,7 +7,7 @@ import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import path from 'path';
 import { parseFile } from '../parser';
-import { analyzeComponent } from './componentAnalyzer';
+import { analyzeComponent, analyzeHOCComponent } from './componentAnalyzer';
 import { analyzeFunction } from './functionAnalyzer';
 import type {
   FileAnalysis,
@@ -17,6 +17,9 @@ import type {
   Framework,
   FileType,
 } from '../types';
+
+// Known React HOC names
+const HOC_NAMES = ['memo', 'forwardRef', 'React.memo', 'React.forwardRef', 'lazy', 'React.lazy'];
 
 /**
  * Analyze a single file
@@ -28,6 +31,7 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
   const components: ComponentInfo[] = [];
   const functions: FunctionInfo[] = [];
   const imports: ImportInfo[] = [];
+  const analyzedNames = new Set<string>(); // Track already analyzed components
 
   // Extract imports
   traverse(ast, {
@@ -56,11 +60,13 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
 
   // Analyze components and functions
   traverse(ast, {
-    // Function declarations
+    // Function declarations (function MyComponent() {})
     FunctionDeclaration(nodePath) {
       if (!nodePath.node.id) return;
 
       const name = nodePath.node.id.name;
+      if (analyzedNames.has(name)) return;
+
       const isExported =
         t.isExportNamedDeclaration(nodePath.parent) ||
         t.isExportDefaultDeclaration(nodePath.parent);
@@ -69,11 +75,13 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
         const componentInfo = analyzeComponent(nodePath, absolutePath);
         if (componentInfo) {
           components.push(componentInfo);
+          analyzedNames.add(name);
         }
       } else if (isExported) {
         const functionInfo = analyzeFunction(nodePath, absolutePath);
         if (functionInfo) {
           functions.push(functionInfo);
+          analyzedNames.add(name);
         }
       }
     },
@@ -81,12 +89,25 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
     // Arrow function expressions (const MyComponent = () => {})
     VariableDeclarator(nodePath) {
       if (!t.isIdentifier(nodePath.node.id)) return;
-      if (!t.isArrowFunctionExpression(nodePath.node.init) && !t.isFunctionExpression(nodePath.node.init)) {
-        return;
+      const name = nodePath.node.id.name;
+      if (analyzedNames.has(name)) return;
+
+      const init = nodePath.node.init;
+      
+      // Check if it's a HOC call: const Component = memo(() => {})
+      if (t.isCallExpression(init)) {
+        const hocResult = analyzeHOCCall(init, name, absolutePath);
+        if (hocResult) {
+          components.push(hocResult);
+          analyzedNames.add(name);
+          return;
+        }
       }
 
-      const name = nodePath.node.id.name;
-      const funcNode = nodePath.node.init;
+      // Regular arrow function or function expression
+      if (!t.isArrowFunctionExpression(init) && !t.isFunctionExpression(init)) {
+        return;
+      }
 
       // Check if exported
       const variableDeclaration = nodePath.parentPath;
@@ -95,17 +116,35 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
         (t.isExportNamedDeclaration(variableDeclaration.parent) ||
           t.isExportDefaultDeclaration(variableDeclaration.parent));
 
-      if (isReactComponent(funcNode)) {
+      if (isReactComponent(init)) {
         const componentInfo = analyzeComponent(nodePath, absolutePath);
         if (componentInfo) {
           components.push(componentInfo);
+          analyzedNames.add(name);
         }
       } else if (isExported) {
         const functionInfo = analyzeFunction(nodePath, absolutePath);
         if (functionInfo) {
           functions.push(functionInfo);
+          analyzedNames.add(name);
         }
       }
+    },
+
+    // Export default with HOC: export default memo(MyComponent)
+    ExportDefaultDeclaration(nodePath) {
+      const declaration = nodePath.node.declaration;
+      
+      // export default memo(Component) or export default memo(() => {})
+      if (t.isCallExpression(declaration)) {
+        const hocResult = analyzeHOCCall(declaration, 'default', absolutePath);
+        if (hocResult && !analyzedNames.has(hocResult.name)) {
+          components.push(hocResult);
+          analyzedNames.add(hocResult.name);
+        }
+      }
+      
+      // export default identifier (already handled by FunctionDeclaration)
     },
   });
 
@@ -121,6 +160,89 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
     functions,
     imports,
   };
+}
+
+/**
+ * Check if a CallExpression is a HOC call and extract the component
+ */
+function analyzeHOCCall(
+  callExpr: t.CallExpression,
+  fallbackName: string,
+  filePath: string
+): ComponentInfo | null {
+  const hocName = getHOCName(callExpr.callee);
+  if (!hocName) return null;
+
+  // Get the inner function from HOC arguments
+  const innerFunc = extractInnerFunction(callExpr);
+  if (!innerFunc) {
+    // HOC wrapping an identifier: memo(MyComponent)
+    // Try to get the component name from the argument
+    if (callExpr.arguments[0] && t.isIdentifier(callExpr.arguments[0])) {
+      const componentName = callExpr.arguments[0].name;
+      // Return a basic component info - the actual component will be analyzed separately
+      return null; // Let the original component be analyzed
+    }
+    return null;
+  }
+
+  // Analyze the inner function as a component
+  return analyzeHOCComponent(innerFunc, fallbackName, filePath, hocName);
+}
+
+/**
+ * Get HOC name from callee
+ */
+function getHOCName(callee: t.Expression | t.V8IntrinsicIdentifier): string | null {
+  // memo(), forwardRef()
+  if (t.isIdentifier(callee)) {
+    if (HOC_NAMES.includes(callee.name)) {
+      return callee.name;
+    }
+  }
+
+  // React.memo(), React.forwardRef()
+  if (t.isMemberExpression(callee)) {
+    if (
+      t.isIdentifier(callee.object) &&
+      callee.object.name === 'React' &&
+      t.isIdentifier(callee.property)
+    ) {
+      const fullName = `React.${callee.property.name}`;
+      if (HOC_NAMES.includes(fullName)) {
+        return callee.property.name;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Extract the inner function from a HOC call
+ * Handles nested HOCs: memo(forwardRef((props, ref) => {}))
+ */
+function extractInnerFunction(
+  callExpr: t.CallExpression
+): t.ArrowFunctionExpression | t.FunctionExpression | null {
+  const firstArg = callExpr.arguments[0];
+
+  if (!firstArg) return null;
+
+  // Direct function: memo(() => {})
+  if (t.isArrowFunctionExpression(firstArg) || t.isFunctionExpression(firstArg)) {
+    return firstArg;
+  }
+
+  // Nested HOC: memo(forwardRef(() => {}))
+  if (t.isCallExpression(firstArg)) {
+    const nestedHocName = getHOCName(firstArg.callee);
+    if (nestedHocName) {
+      return extractInnerFunction(firstArg);
+    }
+  }
+
+  return null;
 }
 
 /**
