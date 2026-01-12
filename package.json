@@ -1,6 +1,6 @@
 {
   "name": "test-gen-js",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Auto-generate test boilerplate code for JavaScript/TypeScript, React, and React Native projects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -53,32 +53,32 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
+    "@babel/generator": "^7.23.0",
     "@babel/parser": "^7.23.0",
     "@babel/traverse": "^7.23.0",
     "@babel/types": "^7.23.0",
-    "@babel/generator": "^7.23.0",
+    "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "ejs": "^3.1.9",
-    "glob": "^10.3.0",
     "fs-extra": "^11.2.0",
-    "chalk": "^4.1.2",
-    "ora": "^5.4.1",
-    "inquirer": "^8.2.6"
+    "glob": "^10.3.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@jest/test-sequencer": "^30.2.0",
     "@types/babel__traverse": "^7.20.0",
     "@types/ejs": "^3.1.0",
     "@types/fs-extra": "^11.0.0",
     "@types/inquirer": "^9.0.0",
-    "typescript": "^5.3.0",
-    "jest": "^29.7.0",
     "@types/jest": "^29.5.0",
-    "ts-jest": "^29.1.0",
-    "eslint": "^8.56.0",
+    "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "prettier": "^3.2.0"
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
   }
 }
-
