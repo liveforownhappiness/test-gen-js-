@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('test-gen-js')
   .description('Auto-generate test boilerplate code for JavaScript/TypeScript projects')
-  .version('0.3.0');
+  .version('0.3.2');
 
 // Generate command
 program
