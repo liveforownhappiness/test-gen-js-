@@ -590,6 +590,129 @@ git commit -m "feat: add new component"
 
 ---
 
+## 🧪 Testing
+
+test-gen-js has comprehensive test coverage to ensure reliability.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage report
+npm test -- --coverage
+
+# Run only unit tests
+npm test -- --testPathIgnorePatterns=integration
+
+# Run only integration tests
+npm test -- --testPathPattern=integration
+
+# Run tests in watch mode
+npm test -- --watch
+```
+
+### Test Structure
+
+| Test Type | Description | Files |
+|-----------|-------------|-------|
+| **Unit Tests** | Test individual modules in isolation | `*.test.ts` |
+| **Integration Tests** | Test CLI commands end-to-end | `cli.integration.test.ts` |
+
+### Test Coverage
+
+```
+-----------------------|---------|----------|---------|---------|
+File                   | % Stmts | % Branch | % Funcs | % Lines |
+-----------------------|---------|----------|---------|---------|
+src/utils              |   96.77 |      100 |     100 |   96.72 |
+src/parser             |   78.72 |    78.72 |   66.66 |   79.01 |
+src/analyzer           |   72.92 |    58.42 |   83.78 |   76.15 |
+src/generator          |   53.84 |    46.03 |   38.88 |   59.40 |
+-----------------------|---------|----------|---------|---------|
+```
+
+### Writing Tests for Your Project
+
+After generating test files with test-gen-js, you can run your project's tests:
+
+```bash
+# Run generated tests
+npm test
+
+# Run specific test file
+npm test -- Button.test.tsx
+
+# Run tests matching a pattern
+npm test -- --testPathPattern=components
+```
+
+### Test Examples
+
+**Unit Test Example:**
+
+```typescript
+// src/utils/helpers.test.ts
+import { formatDate, calculateTotal } from './helpers';
+
+describe('formatDate', () => {
+  it('should format date correctly', () => {
+    const result = formatDate(new Date('2024-01-15'));
+    expect(result).toBe('2024-01-15');
+  });
+});
+
+describe('calculateTotal', () => {
+  it('should calculate total with tax', () => {
+    const result = calculateTotal(100, 0.1);
+    expect(result).toBe(110);
+  });
+});
+```
+
+**Integration Test Example:**
+
+```typescript
+// src/cli.integration.test.ts
+import { execSync } from 'child_process';
+import fs from 'fs-extra';
+
+describe('CLI Integration', () => {
+  it('should generate test file', () => {
+    // Run CLI command
+    execSync('npx test-gen-js generate src/Button.tsx');
+    
+    // Verify output
+    expect(fs.existsSync('src/Button.test.tsx')).toBe(true);
+  });
+});
+```
+
+### Continuous Integration
+
+Add to your CI/CD pipeline:
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm test -- --coverage
+      - run: npm run build
+```
+
+---
+
 ## 📁 Project Structure
 
 ```
