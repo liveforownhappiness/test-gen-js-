@@ -177,12 +177,7 @@ function analyzeHOCCall(
   const innerFunc = extractInnerFunction(callExpr);
   if (!innerFunc) {
     // HOC wrapping an identifier: memo(MyComponent)
-    // Try to get the component name from the argument
-    if (callExpr.arguments[0] && t.isIdentifier(callExpr.arguments[0])) {
-      const componentName = callExpr.arguments[0].name;
-      // Return a basic component info - the actual component will be analyzed separately
-      return null; // Let the original component be analyzed
-    }
+    // The actual component will be analyzed separately
     return null;
   }
 

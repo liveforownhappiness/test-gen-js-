@@ -3,7 +3,7 @@
  * Tests the CLI commands end-to-end by executing actual commands
  */
 
-import { execSync, exec } from 'child_process';
+import { execSync } from 'child_process';
 import path from 'path';
 import fs from 'fs-extra';
 import os from 'os';
