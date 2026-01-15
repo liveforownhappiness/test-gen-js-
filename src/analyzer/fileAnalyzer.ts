@@ -93,7 +93,7 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
       if (analyzedNames.has(name)) return;
 
       const init = nodePath.node.init;
-      
+
       // Check if it's a HOC call: const Component = memo(() => {})
       if (t.isCallExpression(init)) {
         const hocResult = analyzeHOCCall(init, name, absolutePath);
@@ -134,7 +134,7 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
     // Export default with HOC: export default memo(MyComponent)
     ExportDefaultDeclaration(nodePath) {
       const declaration = nodePath.node.declaration;
-      
+
       // export default memo(Component) or export default memo(() => {})
       if (t.isCallExpression(declaration)) {
         const hocResult = analyzeHOCCall(declaration, 'default', absolutePath);
@@ -143,7 +143,7 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysis> {
           analyzedNames.add(hocResult.name);
         }
       }
-      
+
       // export default identifier (already handled by FunctionDeclaration)
     },
   });
@@ -325,4 +325,3 @@ function determineFileType(components: ComponentInfo[], functions: FunctionInfo[
   }
   return 'unknown';
 }
-

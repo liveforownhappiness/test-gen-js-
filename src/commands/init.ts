@@ -43,7 +43,9 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
   console.log(chalk.green('✅ test-gen-js initialized successfully!'));
   console.log('');
   console.log(chalk.cyan('Next steps:'));
-  console.log('  1. Generate tests: ' + chalk.yellow('npx test-gen-js generate src/components/Button.tsx'));
+  console.log(
+    '  1. Generate tests: ' + chalk.yellow('npx test-gen-js generate src/components/Button.tsx')
+  );
   console.log('  2. Run tests: ' + chalk.yellow('npm test'));
   console.log('  3. Commit your code - tests will run automatically!');
   console.log('');
@@ -120,16 +122,17 @@ async function setupGitHooks(cwd: string): Promise<void> {
 
     // Check if husky is already installed
     const hasHusky = packageJson.devDependencies?.husky || packageJson.dependencies?.husky;
-    const hasLintStaged = packageJson.devDependencies?.['lint-staged'] || packageJson.dependencies?.['lint-staged'];
+    const hasLintStaged =
+      packageJson.devDependencies?.['lint-staged'] || packageJson.dependencies?.['lint-staged'];
 
     // Install husky and lint-staged if not present
     if (!hasHusky || !hasLintStaged) {
       spinner.text = 'Installing husky and lint-staged...';
-      
+
       const packagesToInstall = [];
       if (!hasHusky) packagesToInstall.push('husky');
       if (!hasLintStaged) packagesToInstall.push('lint-staged');
-      
+
       try {
         execSync(`npm install -D ${packagesToInstall.join(' ')}`, {
           cwd,
@@ -165,7 +168,7 @@ async function setupGitHooks(cwd: string): Promise<void> {
     // Initialize husky
     spinner.text = 'Initializing husky...';
     const huskyDir = path.join(cwd, '.husky');
-    
+
     if (!(await fs.pathExists(huskyDir))) {
       try {
         execSync('npx husky install', { cwd, stdio: 'pipe' });
@@ -177,7 +180,7 @@ async function setupGitHooks(cwd: string): Promise<void> {
     // Create pre-commit hook
     spinner.text = 'Creating pre-commit hook...';
     await fs.ensureDir(huskyDir);
-    
+
     const preCommitPath = path.join(huskyDir, 'pre-commit');
     const preCommitContent = `#!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
@@ -192,7 +195,7 @@ npx lint-staged
     // Create husky.sh helper if it doesn't exist
     const huskyHelperDir = path.join(huskyDir, '_');
     await fs.ensureDir(huskyHelperDir);
-    
+
     const huskyShPath = path.join(huskyHelperDir, 'husky.sh');
     if (!(await fs.pathExists(huskyShPath))) {
       const huskyShContent = `#!/usr/bin/env sh
@@ -244,9 +247,12 @@ fi
     console.log('  • ' + chalk.yellow('pre-commit hook') + ' - Tests run before each commit');
     console.log('');
     console.log(chalk.cyan('💡 How it works:'));
-    console.log('  When you run ' + chalk.yellow('git commit') + ', tests for changed files will run automatically.');
+    console.log(
+      '  When you run ' +
+        chalk.yellow('git commit') +
+        ', tests for changed files will run automatically.'
+    );
     console.log('  If tests fail, the commit will be blocked.');
-
   } catch (error) {
     spinner.fail(chalk.red('Failed to setup Git hooks'));
     throw error;
@@ -254,4 +260,3 @@ fi
 }
 
 export default initCommand;
-

@@ -76,7 +76,7 @@ describe('analyzeFile', () => {
       try {
         const analysis = await analyzeFile(tempFile);
         expect(analysis.functions.length).toBe(1);
-        
+
         const addFunc = analysis.functions[0];
         expect(addFunc.name).toBe('add');
         expect(addFunc.params.length).toBe(2);
@@ -205,10 +205,10 @@ describe('analyzeFile', () => {
       try {
         const analysis = await analyzeFile(tempFile);
         expect(analysis.components.length).toBe(1);
-        
+
         const props = analysis.components[0].props;
         expect(props.length).toBe(3);
-        
+
         const nameProp = props.find((p) => p.name === 'name');
         expect(nameProp).toBeDefined();
         expect(nameProp!.required).toBe(true);

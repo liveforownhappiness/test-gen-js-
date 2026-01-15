@@ -5,4 +5,3 @@
 export { analyzeFile, analyzeDirectory } from './fileAnalyzer';
 export { analyzeComponent } from './componentAnalyzer';
 export { analyzeFunction } from './functionAnalyzer';
-

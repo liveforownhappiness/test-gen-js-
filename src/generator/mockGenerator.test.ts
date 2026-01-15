@@ -54,7 +54,11 @@ describe('generateMocks', () => {
 
     it('should generate mock for @react-navigation/stack', () => {
       const imports: ImportInfo[] = [
-        { source: '@react-navigation/stack', specifiers: ['createStackNavigator'], isDefault: false },
+        {
+          source: '@react-navigation/stack',
+          specifiers: ['createStackNavigator'],
+          isDefault: false,
+        },
       ];
       const result = generateMocks(imports);
 
@@ -82,7 +86,11 @@ describe('generateMocks', () => {
   describe('AsyncStorage mock', () => {
     it('should generate mock for @react-native-async-storage/async-storage', () => {
       const imports: ImportInfo[] = [
-        { source: '@react-native-async-storage/async-storage', specifiers: ['default'], isDefault: true },
+        {
+          source: '@react-native-async-storage/async-storage',
+          specifiers: ['default'],
+          isDefault: true,
+        },
       ];
       const result = generateMocks(imports);
 
@@ -158,7 +166,11 @@ describe('generateMocks', () => {
 
     it('should handle mixed specifiers with namespace', () => {
       const imports: ImportInfo[] = [
-        { source: './helpers', specifiers: ['helper1', '* as allHelpers', 'helper2'], isDefault: false },
+        {
+          source: './helpers',
+          specifiers: ['helper1', '* as allHelpers', 'helper2'],
+          isDefault: false,
+        },
       ];
       const result = generateMocks(imports);
 

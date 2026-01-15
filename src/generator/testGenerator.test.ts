@@ -179,9 +179,9 @@ describe('generateTest', () => {
       const analysis = await analyzeFile(tempSourceFile);
       const outputPath = path.join(tempDir, 'empty.test.ts');
 
-      await expect(
-        generateTest(analysis, { output: outputPath })
-      ).rejects.toThrow('No components or functions found');
+      await expect(generateTest(analysis, { output: outputPath })).rejects.toThrow(
+        'No components or functions found'
+      );
     });
   });
 });
@@ -200,9 +200,7 @@ describe('generateTests', () => {
 
   it('should generate tests for multiple files', async () => {
     const files = ['Button.tsx', 'Card.tsx', 'utils.ts'];
-    const analyses = await Promise.all(
-      files.map((f) => analyzeFile(path.join(examplesDir, f)))
-    );
+    const analyses = await Promise.all(files.map((f) => analyzeFile(path.join(examplesDir, f))));
 
     const results = await generateTests(
       analyses.map((a, i) => ({

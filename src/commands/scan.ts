@@ -152,8 +152,14 @@ export async function scanCommand(
         const testResult = await generateTest(analysis, generatorOptions);
         result.files.push(testResult);
 
-        const icon = testResult.action === 'created' ? '✅' : testResult.action === 'updated' ? '🔄' : '⏭️';
-        const color = testResult.action === 'created' ? chalk.green : testResult.action === 'updated' ? chalk.blue : chalk.gray;
+        const icon =
+          testResult.action === 'created' ? '✅' : testResult.action === 'updated' ? '🔄' : '⏭️';
+        const color =
+          testResult.action === 'created'
+            ? chalk.green
+            : testResult.action === 'updated'
+              ? chalk.blue
+              : chalk.gray;
 
         console.log(
           color(`${progress} ${icon} ${relativePath}`) +
@@ -203,4 +209,3 @@ function getTestFilePath(sourcePath: string): string {
 }
 
 export default scanCommand;
-

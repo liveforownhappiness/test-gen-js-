@@ -134,4 +134,3 @@ export function generateHookMock(hookName: string): string {
 
   return hookMocks[hookName] || `// TODO: Mock ${hookName}`;
 }
-

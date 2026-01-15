@@ -166,4 +166,3 @@ function getDefaultValueString(node: t.Expression): string {
   if (t.isObjectExpression(node)) return '{}';
   return 'undefined';
 }
-

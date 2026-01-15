@@ -157,7 +157,7 @@ function generatePropValue(prop: { name: string; type: string; required: boolean
 
   // Common prop patterns
   if (prop.name === 'children') return "'Test Children'";
-  if (prop.name === 'className' || prop.name === 'style') return "{}";
+  if (prop.name === 'className' || prop.name === 'style') return '{}';
   if (prop.name === 'testID' || prop.name === 'data-testid') return "'test-id'";
   if (prop.name.toLowerCase().includes('id')) return "'test-id'";
   if (prop.name.toLowerCase().includes('name')) return "'Test Name'";
@@ -323,4 +323,3 @@ describe('<%= func.name %>', () => {
 <% }); %>
 `;
 }
-
