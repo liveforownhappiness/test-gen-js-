@@ -3,17 +3,24 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
+import fs from 'fs-extra';
+import path from 'path';
 import { analyzeFile } from './analyzer';
 import { generateTest } from './generator';
 import { initCommand, scanCommand } from './commands';
 import type { GeneratorOptions } from './types';
+
+// Read version from package.json
+const packageJsonPath = path.join(__dirname, '../package.json');
+const packageJson = fs.readJsonSync(packageJsonPath);
+const version: string = packageJson.version;
 
 const program = new Command();
 
 program
   .name('test-gen-js')
   .description('Auto-generate test boilerplate code for JavaScript/TypeScript projects')
-  .version('0.3.2');
+  .version(version);
 
 // Generate command
 program
