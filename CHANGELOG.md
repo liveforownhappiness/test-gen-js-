@@ -11,7 +11,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Node.js backend support
 - Custom templates
 - Watch mode
-- Prettier/ESLint integration
+- Vitest template support
+
+---
+
+## [0.3.3] - 2026-01-20
+
+### Added
+- 🧪 **Comprehensive Test Suite** - 194 test cases covering all major modules
+  - Unit tests for parser, analyzer, generator, utils
+  - Integration tests for CLI commands
+  - Test coverage improved from 0% to ~60%
+- 🔧 **GitHub Actions CI/CD** - Automated testing and publishing
+  - `ci.yml` - Runs tests on Node.js 18, 20, 22
+  - `publish.yml` - Auto-publish to npm on release
+- 📝 **ESLint/Prettier Configuration** - Code quality tools
+  - `.eslintrc.js` - TypeScript linting rules
+  - `.prettierrc` - Code formatting rules
+  - `.eslintignore` / `.prettierignore` - Ignore patterns
+
+### Changed
+- 🔄 **Dynamic Version Loading** - CLI version now reads from package.json
+  - No more hardcoded version strings
+  - Prevents version mismatch issues
+
+### Tests Added
+- `astParser.test.ts` - 15 tests for AST parsing
+- `typeExtractor.test.ts` - 28 tests for type extraction
+- `fileAnalyzer.test.ts` - 14 tests for file analysis
+- `functionAnalyzer.test.ts` - 31 tests for function analysis
+- `testGenerator.test.ts` - 10 tests for test generation
+- `mockGenerator.test.ts` - 24 tests for mock generation
+- `fileUtils.test.ts` - 26 tests for file utilities
+- `naming.test.ts` - 26 tests for naming utilities
+- `cli.integration.test.ts` - 20 tests for CLI integration
 
 ---
 
@@ -127,7 +160,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.3.0...v0.3.3
+[0.3.0]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/liveforownhappiness/test-gen-js/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/liveforownhappiness/test-gen-js/releases/tag/v0.1.0
 [0.0.1]: https://github.com/liveforownhappiness/test-gen-js/releases/tag/v0.0.1
