@@ -1,7 +1,14 @@
 <%
 const sourceImport = helpers.getRelativeImport(analysis.filePath.replace(/\.(tsx?|jsx?)$/, '.test.$1'), analysis.filePath);
+const isVitest = options.testRunner === 'vitest';
+const mockFn = isVitest ? 'vi.fn()' : 'jest.fn()';
+const clearMocks = isVitest ? 'vi.clearAllMocks()' : 'jest.clearAllMocks()';
+const spyOn = isVitest ? 'vi.spyOn' : 'jest.spyOn';
 %>
 /* eslint-disable @typescript-eslint/no-unused-vars */
+<% if (isVitest) { %>
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+<% } %>
 <% analysis.functions.forEach(func => { %>
 import { <%= func.name %> } from '<%= sourceImport %>';
 <% }); %>
@@ -9,7 +16,7 @@ import { <%= func.name %> } from '<%= sourceImport %>';
 <% analysis.functions.forEach(func => { %>
 describe('<%= func.name %>', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    <%- clearMocks %>;
   });
 
 <% if (func.isAsync) { %>
@@ -23,7 +30,7 @@ describe('<%= func.name %>', () => {
   it('should handle errors gracefully', async () => {
     // TODO: Mock error scenario
     // Example:
-    // jest.spyOn(someModule, 'someMethod').mockRejectedValue(new Error('Test error'));
+    // <%- spyOn %>(someModule, 'someMethod').mockRejectedValue(new Error('Test error'));
     // await expect(<%= func.name %>()).rejects.toThrow('Test error');
   });
 <% } else { %>
@@ -57,4 +64,3 @@ describe('<%= func.name %>', () => {
 });
 
 <% }); %>
-

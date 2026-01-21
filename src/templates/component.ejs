@@ -1,8 +1,14 @@
 <%
 const testLib = helpers.getTestingLibrary(analysis.framework);
 const sourceImport = helpers.getRelativeImport(analysis.filePath.replace(/\.(tsx?|jsx?)$/, '.test.$1'), analysis.filePath);
+const isVitest = options.testRunner === 'vitest';
+const mockFn = isVitest ? 'vi.fn()' : 'jest.fn()';
+const clearMocks = isVitest ? 'vi.clearAllMocks()' : 'jest.clearAllMocks()';
 %>
 /* eslint-disable @typescript-eslint/no-unused-vars */
+<% if (isVitest) { %>
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+<% } %>
 import React from 'react';
 import { <%= testLib.imports.join(', ') %> } from '<%= testLib.package %>';
 <% analysis.components.forEach(component => { %>
@@ -13,12 +19,12 @@ import { <%= component.name %> } from '<%= sourceImport %>';
 describe('<%= component.name %>', () => {
   const defaultProps = {
 <% component.props.forEach((prop, index) => { %>
-    <%- prop.name %>: <%- helpers.generatePropValue(prop) %><%- index < component.props.length - 1 ? ',' : '' %>
+    <%- prop.name %>: <%- helpers.generatePropValue(prop, isVitest) %><%- index < component.props.length - 1 ? ',' : '' %>
 <% }); %>
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    <%- clearMocks %>;
   });
 
   it('renders without crashing', () => {
@@ -41,7 +47,7 @@ describe('<%= component.name %>', () => {
 <% }); %>
 <% component.events.forEach(event => { %>
   it('calls <%= event %> when triggered', () => {
-    const handler = jest.fn();
+    const handler = <%- mockFn %>;
     render(<<%= component.name %> {...defaultProps} <%= event %>={handler} />);
     
     // TODO: Trigger the <%= event %> event
@@ -65,4 +71,3 @@ describe('<%= component.name %>', () => {
 });
 
 <% }); %>
-

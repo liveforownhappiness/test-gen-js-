@@ -32,7 +32,8 @@ program
   .option('--snapshot', 'Include snapshot tests', false)
   .option('--mock', 'Auto-generate mocks for dependencies', true)
   .option('--overwrite', 'Overwrite existing test file', false)
-  .action(async (file: string, options: GeneratorOptions & { template: string }) => {
+  .option('--vitest', 'Use Vitest instead of Jest', false)
+  .action(async (file: string, options: GeneratorOptions & { template: string; vitest: boolean }) => {
     const spinner = ora('Analyzing file...').start();
 
     try {
@@ -46,6 +47,7 @@ program
         snapshot: options.snapshot,
         mock: options.mock,
         overwrite: options.overwrite,
+        testRunner: options.vitest ? 'vitest' : 'jest',
       });
 
       spinner.succeed(chalk.green('Test file generated!'));
@@ -88,6 +90,7 @@ program
   .option('--exclude <patterns...>', 'Patterns to exclude')
   .option('--snapshot', 'Include snapshot tests', false)
   .option('--overwrite', 'Overwrite existing test files', false)
+  .option('--vitest', 'Use Vitest instead of Jest', false)
   .action(async (directory: string, options) => {
     try {
       await scanCommand(directory, {
@@ -96,6 +99,7 @@ program
         dryRun: options.dryRun,
         snapshot: options.snapshot,
         overwrite: options.overwrite,
+        testRunner: options.vitest ? 'vitest' : 'jest',
       });
     } catch (error) {
       if (error instanceof Error) {

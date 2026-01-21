@@ -25,6 +25,7 @@ export async function generateTest(
     mock = true,
     testSuffix = '.test',
     overwrite = false,
+    testRunner = 'jest',
   } = options;
 
   // Determine output path
@@ -48,9 +49,9 @@ export async function generateTest(
   let code: string;
 
   if (analysis.components.length > 0) {
-    code = await generateComponentTest(analysis, { snapshot, mock });
+    code = await generateComponentTest(analysis, { snapshot, mock, testRunner });
   } else if (analysis.functions.length > 0) {
-    code = await generateFunctionTest(analysis, { mock });
+    code = await generateFunctionTest(analysis, { mock, testRunner });
   } else {
     throw new Error('No components or functions found to generate tests for');
   }
@@ -89,7 +90,7 @@ export async function generateTests(
  */
 async function generateComponentTest(
   analysis: FileAnalysis,
-  options: { snapshot: boolean; mock: boolean }
+  options: { snapshot: boolean; mock: boolean; testRunner: string }
 ): Promise<string> {
   const templatePath = path.join(TEMPLATES_DIR, 'component.ejs');
 
@@ -106,8 +107,9 @@ async function generateComponentTest(
     analysis,
     options,
     helpers: {
-      generateMockValue,
-      generatePropValue,
+      generateMockValue: (type: string) => generateMockValue(type, options.testRunner === 'vitest'),
+      generatePropValue: (prop: { name: string; type: string; required: boolean }) =>
+        generatePropValue(prop, options.testRunner === 'vitest'),
       getRelativeImport,
       getTestingLibrary,
     },
@@ -121,7 +123,7 @@ async function generateComponentTest(
  */
 async function generateFunctionTest(
   analysis: FileAnalysis,
-  options: { mock: boolean }
+  options: { mock: boolean; testRunner: string }
 ): Promise<string> {
   const templatePath = path.join(TEMPLATES_DIR, 'function.ejs');
 
@@ -138,7 +140,7 @@ async function generateFunctionTest(
     analysis,
     options,
     helpers: {
-      generateMockValue,
+      generateMockValue: (type: string) => generateMockValue(type, options.testRunner === 'vitest'),
       getRelativeImport,
     },
   };
@@ -149,10 +151,15 @@ async function generateFunctionTest(
 /**
  * Generate a prop value for testing
  */
-function generatePropValue(prop: { name: string; type: string; required: boolean }): string {
+function generatePropValue(
+  prop: { name: string; type: string; required: boolean },
+  isVitest = false
+): string {
+  const mockFn = isVitest ? 'vi.fn()' : 'jest.fn()';
+
   // Event handlers
   if (prop.name.startsWith('on') && prop.name.length > 2) {
-    return 'jest.fn()';
+    return mockFn;
   }
 
   // Common prop patterns
@@ -169,7 +176,7 @@ function generatePropValue(prop: { name: string; type: string; required: boolean
   if (prop.name.toLowerCase().includes('visible')) return 'true';
   if (prop.name.toLowerCase().includes('active')) return 'true';
 
-  return generateMockValue(prop.type);
+  return generateMockValue(prop.type, isVitest);
 }
 
 /**

@@ -108,7 +108,9 @@ function extractQualifiedName(node: t.TSQualifiedName): string {
 /**
  * Generate a mock value based on type
  */
-export function generateMockValue(type: string): string {
+export function generateMockValue(type: string, isVitest = false): string {
+  const mockFn = isVitest ? 'vi.fn()' : 'jest.fn()';
+
   const typeMap: Record<string, string> = {
     string: "'test-string'",
     number: '42',
@@ -119,7 +121,7 @@ export function generateMockValue(type: string): string {
     null: 'null',
     undefined: 'undefined',
     object: '{}',
-    Function: 'jest.fn()',
+    Function: mockFn,
     array: '[]',
   };
 
@@ -130,7 +132,7 @@ export function generateMockValue(type: string): string {
 
   // Check for function types
   if (type.includes('=>') || type === 'Function') {
-    return 'jest.fn()';
+    return mockFn;
   }
 
   return typeMap[type] || '{}';

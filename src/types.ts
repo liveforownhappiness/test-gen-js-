@@ -8,6 +8,9 @@ export type FileType = 'function' | 'component' | 'hook' | 'class' | 'unknown';
 /** Supported frameworks */
 export type Framework = 'react' | 'react-native' | 'node' | 'vanilla';
 
+/** Supported test runners */
+export type TestRunner = 'jest' | 'vitest';
+
 /** Information about a prop */
 export interface PropInfo {
   name: string;
@@ -78,6 +81,8 @@ export interface GeneratorOptions {
   testSuffix?: string;
   /** Overwrite existing test file */
   overwrite?: boolean;
+  /** Test runner to use (default: jest) */
+  testRunner?: TestRunner;
 }
 
 /** Generated test result */

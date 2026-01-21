@@ -10,7 +10,7 @@ import ora from 'ora';
 import { glob } from 'glob';
 import { analyzeFile } from '../analyzer';
 import { generateTest } from '../generator';
-import type { GeneratorOptions, GeneratedTest } from '../types';
+import type { GeneratorOptions, GeneratedTest, TestRunner } from '../types';
 
 interface ScanOptions {
   pattern?: string;
@@ -18,6 +18,7 @@ interface ScanOptions {
   dryRun?: boolean;
   snapshot?: boolean;
   overwrite?: boolean;
+  testRunner?: TestRunner;
 }
 
 interface ScanResult {
@@ -52,6 +53,7 @@ export async function scanCommand(
     dryRun = false,
     snapshot = false,
     overwrite = false,
+    testRunner = 'jest',
   } = options;
 
   const cwd = process.cwd();
@@ -147,6 +149,7 @@ export async function scanCommand(
           snapshot,
           overwrite,
           mock: true,
+          testRunner,
         };
 
         const testResult = await generateTest(analysis, generatorOptions);
