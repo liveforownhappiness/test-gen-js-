@@ -7,7 +7,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { analyzeFile } from './analyzer';
 import { generateTest } from './generator';
-import { initCommand, scanCommand } from './commands';
+import { initCommand, scanCommand, watchCommand } from './commands';
 import type { GeneratorOptions } from './types';
 
 // Read version from package.json
@@ -120,6 +120,33 @@ program
       await initCommand({
         hooks: options.hooks,
         force: options.force,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(chalk.red('Error: ' + error.message));
+      }
+      process.exit(1);
+    }
+  });
+
+// Watch command
+program
+  .command('watch <directory>')
+  .alias('w')
+  .description('Watch directory and auto-generate tests on file changes')
+  .option('--pattern <glob>', 'File pattern to match', '**/*.{ts,tsx,js,jsx}')
+  .option('--exclude <patterns...>', 'Patterns to exclude')
+  .option('--snapshot', 'Include snapshot tests', false)
+  .option('--overwrite', 'Overwrite existing test files', false)
+  .option('--vitest', 'Use Vitest instead of Jest', false)
+  .action(async (directory: string, options) => {
+    try {
+      await watchCommand(directory, {
+        pattern: options.pattern,
+        exclude: options.exclude,
+        snapshot: options.snapshot,
+        overwrite: options.overwrite,
+        testRunner: options.vitest ? 'vitest' : 'jest',
       });
     } catch (error) {
       if (error instanceof Error) {
