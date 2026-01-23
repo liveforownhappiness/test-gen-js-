@@ -33,52 +33,59 @@ program
   .option('--mock', 'Auto-generate mocks for dependencies', true)
   .option('--overwrite', 'Overwrite existing test file', false)
   .option('--vitest', 'Use Vitest instead of Jest', false)
-  .action(async (file: string, options: GeneratorOptions & { template: string; vitest: boolean }) => {
-    const spinner = ora('Analyzing file...').start();
+  .option('--templates-dir <path>', 'Custom templates directory')
+  .action(
+    async (
+      file: string,
+      options: GeneratorOptions & { template: string; vitest: boolean; templatesDir?: string }
+    ) => {
+      const spinner = ora('Analyzing file...').start();
 
-    try {
-      // Analyze the source file
-      const analysis = await analyzeFile(file);
-      spinner.text = 'Generating tests...';
+      try {
+        // Analyze the source file
+        const analysis = await analyzeFile(file);
+        spinner.text = 'Generating tests...';
 
-      // Generate test code
-      const result = await generateTest(analysis, {
-        output: options.output,
-        snapshot: options.snapshot,
-        mock: options.mock,
-        overwrite: options.overwrite,
-        testRunner: options.vitest ? 'vitest' : 'jest',
-      });
-
-      spinner.succeed(chalk.green('Test file generated!'));
-
-      console.log('');
-      console.log(chalk.cyan('📄 Source:'), file);
-      console.log(chalk.cyan('📝 Output:'), result.outputPath);
-      console.log(chalk.cyan('📊 Action:'), result.action);
-      console.log('');
-
-      if (analysis.components.length > 0) {
-        console.log(chalk.yellow('Components found:'));
-        analysis.components.forEach((c) => {
-          console.log(`  - ${c.name} (${c.props.length} props, ${c.hooks.length} hooks)`);
+        // Generate test code
+        const result = await generateTest(analysis, {
+          output: options.output,
+          snapshot: options.snapshot,
+          mock: options.mock,
+          overwrite: options.overwrite,
+          testRunner: options.vitest ? 'vitest' : 'jest',
+          templatesDir: options.templatesDir,
         });
-      }
 
-      if (analysis.functions.length > 0) {
-        console.log(chalk.yellow('Functions found:'));
-        analysis.functions.forEach((f) => {
-          console.log(`  - ${f.name}(${f.params.map((p) => p.name).join(', ')})`);
-        });
+        spinner.succeed(chalk.green('Test file generated!'));
+
+        console.log('');
+        console.log(chalk.cyan('📄 Source:'), file);
+        console.log(chalk.cyan('📝 Output:'), result.outputPath);
+        console.log(chalk.cyan('📊 Action:'), result.action);
+        console.log('');
+
+        if (analysis.components.length > 0) {
+          console.log(chalk.yellow('Components found:'));
+          analysis.components.forEach((c) => {
+            console.log(`  - ${c.name} (${c.props.length} props, ${c.hooks.length} hooks)`);
+          });
+        }
+
+        if (analysis.functions.length > 0) {
+          console.log(chalk.yellow('Functions found:'));
+          analysis.functions.forEach((f) => {
+            console.log(`  - ${f.name}(${f.params.map((p) => p.name).join(', ')})`);
+          });
+        }
+      } catch (error) {
+        spinner.fail(chalk.red('Failed to generate tests'));
+        if (error instanceof Error) {
+          console.error(chalk.red(error.message));
+        }
+        process.exit(1);
       }
-    } catch (error) {
-      spinner.fail(chalk.red('Failed to generate tests'));
-      if (error instanceof Error) {
-        console.error(chalk.red(error.message));
-      }
-      process.exit(1);
     }
-  });
+  );
 
 // Scan command
 program

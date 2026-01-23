@@ -83,6 +83,8 @@ export interface GeneratorOptions {
   overwrite?: boolean;
   /** Test runner to use (default: jest) */
   testRunner?: TestRunner;
+  /** Custom templates directory */
+  templatesDir?: string;
 }
 
 /** Generated test result */

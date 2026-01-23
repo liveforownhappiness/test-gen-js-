@@ -26,6 +26,7 @@ export async function generateTest(
     testSuffix = '.test',
     overwrite = false,
     testRunner = 'jest',
+    templatesDir,
   } = options;
 
   // Determine output path
@@ -49,9 +50,9 @@ export async function generateTest(
   let code: string;
 
   if (analysis.components.length > 0) {
-    code = await generateComponentTest(analysis, { snapshot, mock, testRunner });
+    code = await generateComponentTest(analysis, { snapshot, mock, testRunner, templatesDir });
   } else if (analysis.functions.length > 0) {
-    code = await generateFunctionTest(analysis, { mock, testRunner });
+    code = await generateFunctionTest(analysis, { mock, testRunner, templatesDir });
   } else {
     throw new Error('No components or functions found to generate tests for');
   }
@@ -90,14 +91,19 @@ export async function generateTests(
  */
 async function generateComponentTest(
   analysis: FileAnalysis,
-  options: { snapshot: boolean; mock: boolean; testRunner: string }
+  options: { snapshot: boolean; mock: boolean; testRunner: string; templatesDir?: string }
 ): Promise<string> {
-  const templatePath = path.join(TEMPLATES_DIR, 'component.ejs');
+  // Check for custom template first, then default
+  const customTemplatePath = options.templatesDir
+    ? path.join(options.templatesDir, 'component.ejs')
+    : null;
+  const defaultTemplatePath = path.join(TEMPLATES_DIR, 'component.ejs');
 
-  // Check if custom template exists, otherwise use default
   let template: string;
-  if (await fs.pathExists(templatePath)) {
-    template = await fs.readFile(templatePath, 'utf-8');
+  if (customTemplatePath && (await fs.pathExists(customTemplatePath))) {
+    template = await fs.readFile(customTemplatePath, 'utf-8');
+  } else if (await fs.pathExists(defaultTemplatePath)) {
+    template = await fs.readFile(defaultTemplatePath, 'utf-8');
   } else {
     template = getDefaultComponentTemplate();
   }
@@ -123,14 +129,19 @@ async function generateComponentTest(
  */
 async function generateFunctionTest(
   analysis: FileAnalysis,
-  options: { mock: boolean; testRunner: string }
+  options: { mock: boolean; testRunner: string; templatesDir?: string }
 ): Promise<string> {
-  const templatePath = path.join(TEMPLATES_DIR, 'function.ejs');
+  // Check for custom template first, then default
+  const customTemplatePath = options.templatesDir
+    ? path.join(options.templatesDir, 'function.ejs')
+    : null;
+  const defaultTemplatePath = path.join(TEMPLATES_DIR, 'function.ejs');
 
-  // Check if custom template exists, otherwise use default
   let template: string;
-  if (await fs.pathExists(templatePath)) {
-    template = await fs.readFile(templatePath, 'utf-8');
+  if (customTemplatePath && (await fs.pathExists(customTemplatePath))) {
+    template = await fs.readFile(customTemplatePath, 'utf-8');
+  } else if (await fs.pathExists(defaultTemplatePath)) {
+    template = await fs.readFile(defaultTemplatePath, 'utf-8');
   } else {
     template = getDefaultFunctionTemplate();
   }

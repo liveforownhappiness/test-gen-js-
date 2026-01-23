@@ -346,11 +346,13 @@ test-gen-js generate <file>
 tgjs g <file>
 
 # Options
---output, -o <path>    # Specify output file path
---template, -t <type>  # Template type (component | function | hook)
---snapshot             # Include snapshot tests
---mock                 # Auto-generate mocks (default: true)
---overwrite            # Overwrite existing file
+--output, -o <path>      # Specify output file path
+--template, -t <type>    # Template type (component | function | hook)
+--snapshot               # Include snapshot tests
+--mock                   # Auto-generate mocks (default: true)
+--overwrite              # Overwrite existing file
+--vitest                 # Use Vitest instead of Jest
+--templates-dir <path>   # Custom templates directory
 ```
 
 **Examples:**
@@ -367,6 +369,12 @@ tgjs g src/components/Header.tsx -o __tests__/Header.test.tsx
 
 # Overwrite existing file
 tgjs g src/components/Header.tsx --overwrite
+
+# Generate with Vitest
+tgjs g src/components/Header.tsx --vitest
+
+# Use custom templates
+tgjs g src/components/Header.tsx --templates-dir ./my-templates
 ```
 
 ### `scan` (alias: `s`)
@@ -384,6 +392,7 @@ tgjs s src
 --exclude <patterns>   # Patterns to exclude
 --snapshot             # Include snapshot tests
 --overwrite            # Overwrite existing test files
+--vitest               # Use Vitest instead of Jest
 ```
 
 **Examples:**
@@ -403,6 +412,9 @@ tgjs scan src --overwrite
 
 # Custom pattern (only .tsx files)
 tgjs scan src --pattern "**/*.tsx"
+
+# Generate with Vitest
+tgjs scan src --vitest
 ```
 
 **Output example:**
@@ -429,6 +441,45 @@ tgjs scan src --pattern "**/*.tsx"
    Skipped:        1
    Failed:         1
 ```
+
+### `watch` (alias: `w`)
+
+Watch directory and auto-generate tests on file changes.
+
+```bash
+# Basic usage
+test-gen-js watch src
+tgjs w src
+
+# Options
+--pattern <glob>       # File pattern (default: **/*.{ts,tsx,js,jsx})
+--exclude <patterns>   # Patterns to exclude
+--snapshot             # Include snapshot tests
+--overwrite            # Overwrite existing test files
+--vitest               # Use Vitest instead of Jest
+```
+
+**Examples:**
+
+```bash
+# Watch src folder for changes
+tgjs watch src
+
+# Watch with Vitest
+tgjs watch src --vitest
+
+# Watch and overwrite existing tests
+tgjs watch src --overwrite
+```
+
+**Behavior:**
+- 📄 **New file added** → Auto-generate test file
+- 📝 **File modified** → Re-generate test (with `--overwrite`)
+- ⏭️ **Test files** → Automatically ignored
+- 🔄 **Debounced** → Prevents multiple triggers
+- Press `Ctrl+C` to stop watching
+
+---
 
 ### `init`
 
@@ -478,13 +529,13 @@ git commit -m "feat: add new component"
 
 | Type | Support | Test Framework | Notes |
 |------|---------|----------------|-------|
-| JavaScript functions | ✅ | Jest | |
-| TypeScript functions | ✅ | Jest | Type analysis supported |
-| React components | ✅ | Jest + @testing-library/react | |
-| React Native components | ✅ | Jest + @testing-library/react-native | |
-| Custom Hooks | ✅ | Jest + @testing-library/react-hooks | |
-| Node.js modules | 🔜 v0.2 | Jest | |
-| Express handlers | 🔜 v0.2 | Jest + supertest | |
+| JavaScript functions | ✅ | Jest / Vitest | |
+| TypeScript functions | ✅ | Jest / Vitest | Type analysis supported |
+| React components | ✅ | Jest / Vitest + @testing-library/react | |
+| React Native components | ✅ | Jest / Vitest + @testing-library/react-native | |
+| Custom Hooks | ✅ | Jest / Vitest + @testing-library/react-hooks | |
+| Node.js modules | 🔜 v0.4 | Jest | |
+| Express handlers | 🔜 v0.4 | Jest + supertest | |
 | Vue components | 🔜 Plugin | Vitest | |
 | Angular components | 🔜 Plugin | Jasmine | |
 
@@ -556,7 +607,7 @@ git commit -m "feat: add new component"
 
 ## 🗺️ Roadmap
 
-### ✅ Phase 1: MVP (v0.1.x) - Current
+### ✅ Phase 1: MVP (v0.1.x)
 
 - [x] Project structure setup
 - [x] AST parser implementation (Babel-based)
@@ -569,19 +620,24 @@ git commit -m "feat: add new component"
 - [x] GitHub Actions CI/CD
 - [x] Automated npm publishing
 
-### ✅ Phase 2: Extended Features (v0.2.x) - Current
+### ✅ Phase 2: Extended Features (v0.2.x)
 
 - [x] Directory scanning and batch generation (`scan` command)
 - [x] Configuration file support (`.testgenrc.js`)
 - [x] Git hooks for pre-commit testing (`init` command)
+
+### ✅ Phase 3: Developer Experience (v0.3.x) - Current
+
+- [x] Vitest support (`--vitest` option)
+- [x] Watch mode (`watch` command)
+- [x] Custom template support (`--templates-dir` option)
+- [x] Comprehensive test suite (194+ tests)
+- [x] ESLint/Prettier integration
+- [x] Dynamic version loading
+
+### 🔮 Phase 4: Plugin System (v0.4.x+)
+
 - [ ] Node.js backend support
-- [ ] Improved mock generation
-- [ ] Prettier/ESLint integration
-- [ ] Watch mode
-- [ ] Custom template support
-
-### 🔮 Phase 3: Plugin System (v0.3.x+)
-
 - [ ] Plugin architecture
 - [ ] Vue.js plugin
 - [ ] Angular plugin
