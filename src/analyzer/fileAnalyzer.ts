@@ -6,6 +6,8 @@
 import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import path from 'path';
+import fs from 'fs-extra';
+import { glob } from 'glob';
 import { parseFile } from '../parser';
 import { analyzeComponent, analyzeHOCComponent } from './componentAnalyzer';
 import { analyzeFunction } from './functionAnalyzer';
@@ -244,11 +246,65 @@ function extractInnerFunction(
  * Analyze all files in a directory
  */
 export async function analyzeDirectory(
-  _dirPath: string,
-  _options?: { pattern?: string; exclude?: string[] }
+  dirPath: string,
+  options?: { pattern?: string; exclude?: string[] }
 ): Promise<FileAnalysis[]> {
-  // TODO: Implement directory scanning
-  throw new Error('Directory scanning is not yet implemented');
+  const {
+    pattern = '**/*.{ts,tsx,js,jsx}',
+    exclude = [
+      'node_modules/**',
+      'dist/**',
+      'build/**',
+      '**/*.test.*',
+      '**/*.spec.*',
+      '**/__tests__/**',
+      '**/__mocks__/**',
+      '**/coverage/**',
+    ],
+  } = options || {};
+
+  const absoluteDirPath = path.resolve(dirPath);
+
+  // Check if directory exists
+  if (!(await fs.pathExists(absoluteDirPath))) {
+    throw new Error(`Directory not found: ${absoluteDirPath}`);
+  }
+
+  // Check if it's actually a directory
+  const stats = await fs.stat(absoluteDirPath);
+  if (!stats.isDirectory()) {
+    throw new Error(`Path is not a directory: ${absoluteDirPath}`);
+  }
+
+  // Find all matching files
+  const files = await glob(pattern, {
+    cwd: absoluteDirPath,
+    ignore: exclude,
+    absolute: true,
+    nodir: true,
+  });
+
+  // Analyze each file
+  const analyses: FileAnalysis[] = [];
+  const errors: Array<{ file: string; error: string }> = [];
+
+  for (const file of files) {
+    try {
+      const analysis = await analyzeFile(file);
+      analyses.push(analysis);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      errors.push({ file, error: errorMessage });
+    }
+  }
+
+  // If all files failed, throw an error
+  if (analyses.length === 0 && errors.length > 0) {
+    const errorMessages = errors.map((e) => `${e.file}: ${e.error}`).join('\n');
+    throw new Error(`Failed to analyze all files:\n${errorMessages}`);
+  }
+
+  return analyses;
 }
 
 /**

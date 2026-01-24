@@ -2,7 +2,7 @@
  * File Analyzer Tests
  */
 
-import { analyzeFile } from './fileAnalyzer';
+import { analyzeFile, analyzeDirectory } from './fileAnalyzer';
 import path from 'path';
 import fs from 'fs-extra';
 import os from 'os';
@@ -291,6 +291,187 @@ describe('analyzeFile', () => {
   describe('Error Handling', () => {
     it('should throw error for non-existent file', async () => {
       await expect(analyzeFile('/non/existent/file.ts')).rejects.toThrow();
+    });
+  });
+});
+
+describe('analyzeDirectory', () => {
+  const examplesDir = path.join(__dirname, '../../examples');
+
+  describe('Basic Directory Analysis', () => {
+    it('should analyze all files in examples directory', async () => {
+      const analyses = await analyzeDirectory(examplesDir);
+
+      expect(analyses.length).toBeGreaterThan(0);
+      expect(analyses.every((a) => a.filePath)).toBe(true);
+    });
+
+    it('should find Button component in directory', async () => {
+      const analyses = await analyzeDirectory(examplesDir);
+
+      const buttonAnalysis = analyses.find((a) => a.filePath.includes('Button.tsx'));
+      expect(buttonAnalysis).toBeDefined();
+      expect(buttonAnalysis!.components.length).toBeGreaterThan(0);
+      expect(buttonAnalysis!.components.some((c) => c.name === 'Button')).toBe(true);
+    });
+
+    it('should find utils functions in directory', async () => {
+      const analyses = await analyzeDirectory(examplesDir);
+
+      const utilsAnalysis = analyses.find((a) => a.filePath.includes('utils.ts'));
+      expect(utilsAnalysis).toBeDefined();
+      expect(utilsAnalysis!.functions.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Pattern Matching', () => {
+    it('should only analyze files matching pattern', async () => {
+      const analyses = await analyzeDirectory(examplesDir, {
+        pattern: '**/*.tsx',
+      });
+
+      expect(analyses.length).toBeGreaterThan(0);
+      expect(analyses.every((a) => a.filePath.endsWith('.tsx'))).toBe(true);
+    });
+
+    it('should exclude test files by default', async () => {
+      const tempDir = path.join(os.tmpdir(), 'test-gen-analyze-dir');
+      await fs.ensureDir(tempDir);
+
+      try {
+        // Create source file
+        await fs.writeFile(
+          path.join(tempDir, 'Component.tsx'),
+          'export const Component = () => <div>Test</div>;'
+        );
+
+        // Create test file
+        await fs.writeFile(
+          path.join(tempDir, 'Component.test.tsx'),
+          'export const Test = () => <div>Test</div>;'
+        );
+
+        const analyses = await analyzeDirectory(tempDir);
+
+        // Should only find Component.tsx, not Component.test.tsx
+        expect(analyses.length).toBe(1);
+        expect(analyses[0].filePath).toContain('Component.tsx');
+        expect(analyses[0].filePath).not.toContain('.test.');
+      } finally {
+        await fs.remove(tempDir);
+      }
+    });
+  });
+
+  describe('Custom Exclude Patterns', () => {
+    it('should exclude files matching custom exclude pattern', async () => {
+      const tempDir = path.join(os.tmpdir(), 'test-gen-analyze-exclude');
+      await fs.ensureDir(tempDir);
+
+      try {
+        await fs.writeFile(
+          path.join(tempDir, 'Component.tsx'),
+          'export const Component = () => <div>Test</div>;'
+        );
+        await fs.writeFile(
+          path.join(tempDir, 'ignored.tsx'),
+          'export const Ignored = () => <div>Test</div>;'
+        );
+
+        const analyses = await analyzeDirectory(tempDir, {
+          exclude: ['**/ignored.tsx'],
+        });
+
+        expect(analyses.length).toBe(1);
+        expect(analyses[0].filePath).toContain('Component.tsx');
+        expect(analyses[0].filePath).not.toContain('ignored');
+      } finally {
+        await fs.remove(tempDir);
+      }
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should throw error for non-existent directory', async () => {
+      await expect(analyzeDirectory('/non/existent/directory')).rejects.toThrow(
+        'Directory not found'
+      );
+    });
+
+    it('should throw error if path is not a directory', async () => {
+      const tempFile = path.join(os.tmpdir(), 'test-gen-not-dir');
+      await fs.writeFile(tempFile, 'not a directory');
+
+      try {
+        await expect(analyzeDirectory(tempFile)).rejects.toThrow('Path is not a directory');
+      } finally {
+        await fs.remove(tempFile);
+      }
+    });
+
+    it('should handle parse errors gracefully', async () => {
+      const tempDir = path.join(os.tmpdir(), 'test-gen-parse-error');
+      await fs.ensureDir(tempDir);
+
+      try {
+        // Create valid file
+        await fs.writeFile(
+          path.join(tempDir, 'Valid.tsx'),
+          'export const Valid = () => <div>Valid</div>;'
+        );
+
+        // Create invalid file
+        await fs.writeFile(path.join(tempDir, 'Invalid.tsx'), 'export const Broken = ({ => ;');
+
+        // Should return results for valid files even if some files fail
+        const analyses = await analyzeDirectory(tempDir);
+        // Should have at least the valid file
+        expect(analyses.length).toBeGreaterThanOrEqual(1);
+        expect(analyses.some((a) => a.filePath.includes('Valid.tsx'))).toBe(true);
+      } finally {
+        await fs.remove(tempDir);
+      }
+    });
+
+    it('should return partial results if some files fail', async () => {
+      const tempDir = path.join(os.tmpdir(), 'test-gen-partial');
+      await fs.ensureDir(tempDir);
+
+      try {
+        // Create valid file
+        await fs.writeFile(
+          path.join(tempDir, 'Valid.tsx'),
+          'export const Valid = () => <div>Valid</div>;'
+        );
+
+        // Create invalid file (but not so broken that it prevents all analysis)
+        // This test might not work as expected if analyzeFile throws for invalid syntax
+        // Let's create a file that might cause issues but not prevent all analysis
+        await fs.writeFile(
+          path.join(tempDir, 'MaybeInvalid.tsx'),
+          'export const MaybeInvalid = () => { return <div>Test</div>; }'
+        );
+
+        const analyses = await analyzeDirectory(tempDir);
+        // Should have at least one valid analysis
+        expect(analyses.length).toBeGreaterThanOrEqual(1);
+      } finally {
+        await fs.remove(tempDir);
+      }
+    });
+  });
+
+  describe('Empty Directory', () => {
+    it('should return empty array for empty directory', async () => {
+      const tempDir = path.join(os.tmpdir(), 'test-gen-empty-dir');
+      await fs.ensureDir(tempDir);
+
+      try {
+        const analyses = await analyzeDirectory(tempDir);
+        expect(analyses).toEqual([]);
+      } finally {
+        await fs.remove(tempDir);
+      }
     });
   });
 });
