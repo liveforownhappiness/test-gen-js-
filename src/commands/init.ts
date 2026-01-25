@@ -95,6 +95,9 @@ module.exports = {
     
     // Overwrite existing test files
     overwrite: false,
+    
+    // Test runner: 'jest' or 'vitest'
+    testRunner: 'jest',
   },
   
   // Template options

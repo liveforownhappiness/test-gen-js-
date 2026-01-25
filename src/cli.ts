@@ -8,6 +8,7 @@ import path from 'path';
 import { analyzeFile } from './analyzer';
 import { generateTest } from './generator';
 import { initCommand, scanCommand, watchCommand } from './commands';
+import { loadConfig, mergeConfigWithOptions } from './utils';
 import type { GeneratorOptions } from './types';
 
 // Read version from package.json
@@ -42,12 +43,11 @@ program
       const spinner = ora('Analyzing file...').start();
 
       try {
-        // Analyze the source file
-        const analysis = await analyzeFile(file);
-        spinner.text = 'Generating tests...';
+        // Load config file
+        const config = await loadConfig();
 
-        // Generate test code
-        const result = await generateTest(analysis, {
+        // Merge config with CLI options (CLI takes precedence)
+        const mergedOptions = mergeConfigWithOptions(config, {
           output: options.output,
           snapshot: options.snapshot,
           mock: options.mock,
@@ -55,6 +55,13 @@ program
           testRunner: options.vitest ? 'vitest' : 'jest',
           templatesDir: options.templatesDir,
         });
+
+        // Analyze the source file
+        const analysis = await analyzeFile(file);
+        spinner.text = 'Generating tests...';
+
+        // Generate test code
+        const result = await generateTest(analysis, mergedOptions);
 
         spinner.succeed(chalk.green('Test file generated!'));
 
@@ -100,13 +107,23 @@ program
   .option('--vitest', 'Use Vitest instead of Jest', false)
   .action(async (directory: string, options) => {
     try {
-      await scanCommand(directory, {
-        pattern: options.pattern,
-        exclude: options.exclude,
-        dryRun: options.dryRun,
+      // Load config file
+      const config = await loadConfig();
+
+      // Merge config with CLI options
+      const mergedOptions = mergeConfigWithOptions(config, {
         snapshot: options.snapshot,
         overwrite: options.overwrite,
         testRunner: options.vitest ? 'vitest' : 'jest',
+      });
+
+      await scanCommand(directory, {
+        pattern: options.pattern || config?.include?.[0] || '**/*.{ts,tsx,js,jsx}',
+        exclude: options.exclude || config?.exclude,
+        dryRun: options.dryRun,
+        snapshot: mergedOptions.snapshot ?? false,
+        overwrite: mergedOptions.overwrite ?? false,
+        testRunner: mergedOptions.testRunner || 'jest',
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -148,12 +165,22 @@ program
   .option('--vitest', 'Use Vitest instead of Jest', false)
   .action(async (directory: string, options) => {
     try {
-      await watchCommand(directory, {
-        pattern: options.pattern,
-        exclude: options.exclude,
+      // Load config file
+      const config = await loadConfig();
+
+      // Merge config with CLI options
+      const mergedOptions = mergeConfigWithOptions(config, {
         snapshot: options.snapshot,
         overwrite: options.overwrite,
         testRunner: options.vitest ? 'vitest' : 'jest',
+      });
+
+      await watchCommand(directory, {
+        pattern: options.pattern || config?.include?.[0] || '**/*.{ts,tsx,js,jsx}',
+        exclude: options.exclude || config?.exclude,
+        snapshot: mergedOptions.snapshot ?? false,
+        overwrite: mergedOptions.overwrite ?? false,
+        testRunner: mergedOptions.testRunner || 'jest',
       });
     } catch (error) {
       if (error instanceof Error) {
