@@ -347,19 +347,61 @@ export const Alias = () => <div>Alias</div>;
       expect(output).toContain('Scanning');
     });
   });
+
+  describe('watch command', () => {
+    const watchTestDir = path.join(os.tmpdir(), 'test-gen-watch-test');
+
+    beforeEach(async () => {
+      await fs.ensureDir(watchTestDir);
+    });
+
+    afterEach(async () => {
+      await fs.remove(watchTestDir);
+    });
+
+    it('should show watch command help', () => {
+      const output = execSync(`node ${cliPath} watch --help`, {
+        cwd: watchTestDir,
+        encoding: 'utf-8',
+      });
+
+      expect(output).toContain('Watch directory');
+      expect(output).toContain('--pattern');
+      expect(output).toContain('--vitest');
+    });
+
+    it('should accept watch command alias', () => {
+      const output = execSync(`node ${cliPath} w --help`, {
+        cwd: watchTestDir,
+        encoding: 'utf-8',
+      });
+
+      expect(output).toContain('Watch directory');
+    });
+
+    it('should handle non-existent directory in watch mode', () => {
+      expect(() => {
+        execSync(`node ${cliPath} watch /non/existent/path`, {
+          cwd: watchTestDir,
+          stdio: 'pipe',
+          timeout: 2000, // Short timeout to prevent hanging
+        });
+      }).toThrow();
+    });
+  });
 });
 
-describe('Error Handling', () => {
-  const tempDir = path.join(os.tmpdir(), 'test-gen-error-test');
-  const cliPath = path.resolve(__dirname, '../bin/cli.js');
+  describe('Error Handling', () => {
+    const tempDir = path.join(os.tmpdir(), 'test-gen-error-test');
+    const cliPath = path.resolve(__dirname, '../bin/cli.js');
 
-  beforeEach(async () => {
-    await fs.ensureDir(tempDir);
-  });
+    beforeEach(async () => {
+      await fs.ensureDir(tempDir);
+    });
 
-  afterEach(async () => {
-    await fs.remove(tempDir);
-  });
+    afterEach(async () => {
+      await fs.remove(tempDir);
+    });
 
   it('should handle invalid file syntax gracefully', async () => {
     const invalidCode = `
