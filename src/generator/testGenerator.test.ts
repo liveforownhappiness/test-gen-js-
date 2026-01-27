@@ -171,6 +171,88 @@ describe('generateTest', () => {
     });
   });
 
+  describe('Custom Options', () => {
+    it('should use custom testSuffix', async () => {
+      const filePath = path.join(examplesDir, 'Button.tsx');
+      const analysis = await analyzeFile(filePath);
+      const outputPath = path.join(tempDir, 'Button.spec.tsx');
+
+      const result = await generateTest(analysis, {
+        output: outputPath,
+        testSuffix: '.spec',
+        overwrite: true,
+      });
+
+      expect(result.action).toBe('created');
+      expect(await fs.pathExists(outputPath)).toBe(true);
+    });
+
+    it('should generate with Vitest when testRunner is vitest', async () => {
+      const filePath = path.join(examplesDir, 'Button.tsx');
+      const analysis = await analyzeFile(filePath);
+      const outputPath = path.join(tempDir, 'ButtonVitest.test.tsx');
+
+      await generateTest(analysis, {
+        output: outputPath,
+        testRunner: 'vitest',
+        overwrite: true,
+      });
+
+      const content = await fs.readFile(outputPath, 'utf-8');
+      expect(content).toContain("import { describe, it, expect, vi, beforeEach } from 'vitest'");
+      expect(content).toContain('vi.fn()');
+      expect(content).toContain('vi.clearAllMocks()');
+    });
+
+    it('should use custom templates directory', async () => {
+      const filePath = path.join(examplesDir, 'Button.tsx');
+      const analysis = await analyzeFile(filePath);
+      const customTemplatesDir = path.join(tempDir, 'custom-templates');
+      await fs.ensureDir(customTemplatesDir);
+
+      // Create custom component template
+      const customTemplate = `<% analysis.components.forEach(component => { %>
+describe('Custom <%= component.name %>', () => {
+  it('custom test', () => {
+    // Custom template
+  });
+});
+<% }); %>`;
+
+      await fs.writeFile(path.join(customTemplatesDir, 'component.ejs'), customTemplate);
+
+      const outputPath = path.join(tempDir, 'ButtonCustom.test.tsx');
+
+      await generateTest(analysis, {
+        output: outputPath,
+        templatesDir: customTemplatesDir,
+        overwrite: true,
+      });
+
+      const content = await fs.readFile(outputPath, 'utf-8');
+      expect(content).toContain("describe('Custom Button'");
+      expect(content).toContain('custom test');
+    });
+
+    it('should use default template when custom template does not exist', async () => {
+      const filePath = path.join(examplesDir, 'Button.tsx');
+      const analysis = await analyzeFile(filePath);
+      const customTemplatesDir = path.join(tempDir, 'non-existent-templates');
+
+      const outputPath = path.join(tempDir, 'ButtonDefault.test.tsx');
+
+      await generateTest(analysis, {
+        output: outputPath,
+        templatesDir: customTemplatesDir,
+        overwrite: true,
+      });
+
+      const content = await fs.readFile(outputPath, 'utf-8');
+      expect(content).toContain("describe('Button'");
+      expect(content).toContain('renders without crashing');
+    });
+  });
+
   describe('Error Handling', () => {
     it('should throw error for file with no components or functions', async () => {
       const tempSourceFile = path.join(tempDir, 'empty.ts');
@@ -212,5 +294,30 @@ describe('generateTests', () => {
 
     expect(results.length).toBe(3);
     expect(results.filter((r) => r.action === 'created').length).toBe(3);
+  });
+
+  it('should handle empty array', async () => {
+    const results = await generateTests([], { overwrite: true });
+    expect(results).toEqual([]);
+  });
+
+  it('should apply options to all files', async () => {
+    const files = ['Button.tsx', 'Card.tsx'];
+    const analyses = await Promise.all(files.map((f) => analyzeFile(path.join(examplesDir, f))));
+
+    const results = await generateTests(
+      analyses.map((a, i) => ({
+        ...a,
+        filePath: path.join(tempDir, `test-${files[i]}`),
+      })),
+      { snapshot: true, testRunner: 'vitest', overwrite: true }
+    );
+
+    expect(results.length).toBe(2);
+    for (const result of results) {
+      const content = await fs.readFile(result.outputPath, 'utf-8');
+      expect(content).toContain('vitest');
+      expect(content).toContain('toMatchSnapshot');
+    }
   });
 });
