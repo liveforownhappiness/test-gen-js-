@@ -20,9 +20,11 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<Config | 
 
   try {
     // Delete require cache to allow hot reloading during development
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     delete require.cache[require.resolve(configPath)];
 
     // Load config file (CommonJS module)
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const config = require(configPath);
 
     // Validate and normalize config
@@ -36,16 +38,19 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<Config | 
 /**
  * Normalize and validate configuration object
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeConfig(config: any): Config {
   const normalized: Config = {};
 
   // Include patterns
   if (config.include && Array.isArray(config.include)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     normalized.include = config.include.filter((p: any) => typeof p === 'string');
   }
 
   // Exclude patterns
   if (config.exclude && Array.isArray(config.exclude)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     normalized.exclude = config.exclude.filter((p: any) => typeof p === 'string');
   }
 

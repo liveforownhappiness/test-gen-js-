@@ -7,7 +7,6 @@ import { watchCommand } from './watch';
 import path from 'path';
 import fs from 'fs-extra';
 import os from 'os';
-import { setTimeout } from 'timers/promises';
 
 describe('watchCommand', () => {
   let tempDir: string;
